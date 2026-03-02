@@ -1,22 +1,40 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Mail } from "lucide-react";
+import { Lock, Mail, AlertCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { signIn, session } = useAuth();
+
+  // If already logged in, redirect to admin
+  if (session) {
+    navigate("/admin");
+    return null;
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // TODO: integrate with Supabase auth
-    setTimeout(() => {
+    setError("");
+
+    try {
+      await signIn(email, password);
       navigate("/admin");
+    } catch (err: any) {
+      setError(
+        err.message === "Invalid login credentials"
+          ? "E-mail ou senha incorretos."
+          : err.message || "Erro ao fazer login."
+      );
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -33,6 +51,17 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm"
+            >
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {error}
+            </motion.div>
+          )}
+
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input

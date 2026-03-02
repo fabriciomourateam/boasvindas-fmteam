@@ -9,104 +9,158 @@ import OptionalBlocks from "@/components/student-page/OptionalBlocks";
 import SupportSection from "@/components/student-page/SupportSection";
 import FooterSection from "@/components/student-page/FooterSection";
 import { Toaster } from "sonner";
+import { useStudentPage } from "@/hooks/useStudentPages";
+import { Loader2 } from "lucide-react";
+import { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
 
-// Demo data — will come from Supabase later
-const demoData = {
-  studentName: "Eduardo",
-  objective: "Recomposição Corporal",
-  plan: "Premium Anual",
-  duration: "12 meses de acompanhamento",
-  strategy: "Déficit calórico moderado + estímulo de hipertrofia, com foco em conseguirmos fazer com que você perca gordura ganhando massa muscular durante esse processo, trazendo assim mais definição muscular!",
-  steps: [
-    { title: "Assista todos os módulos da Área de Membros", description: "É essencial ver todos os vídeos antes de iniciar." },
-    { title: "Baixe os aplicativos (WebDiet e MFit)", description: "Acesse seu plano alimentar e treinos pelo celular." },
-    { title: "Siga o plano alimentar à risca", description: "Este é o ponto principal do seu acompanhamento." },
-    { title: "Inicie os treinos periodizados", description: "12 semanas de progressão para evolução contínua." },
-    { title: "Dê feedbacks nos Check-ins", description: "A comunicação é a chave do nosso trabalho!" },
-  ],
-  links: [
-    { label: "Área de Membros", url: "#", icon: "members", description: "Módulos e orientações completas" },
-    { label: "Suporte WhatsApp", url: "#", icon: "support", description: "Segunda a sexta, 08h às 18h" },
-  ],
-  credentials: [
-    { appName: "WebDiet", login: "11 98827-3628", password: "data_nascimento", instructions: "Abra o app e clique em 'Já me consultei'" },
-    { appName: "MFit Personal", login: "luziano.jo@gmail.com", password: "10912", instructions: "Clique em 'Sou aluno' e entre com os dados" },
-  ],
-  guidelines: {
-    content: "Faça todas as refeições do dia, NEM A MAIS, NEM A MENOS. Não incluir alimentos que não estejam na dieta. Evite ficar beliscando — as beliscadas são o que mais atrapalham os planejamentos.",
-    highlights: [
-      "Pode inverter a ordem das refeições quando for mais prático",
-      "Pode comer a refeição em horário diferente do que está na dieta",
-      "Progrida nas cargas sempre que conseguir, levando as repetições até a falha",
-    ],
-  },
-  optionalBlocks: [
-    {
-      type: "treino" as const,
-      title: "Treino Periodizado",
-      content: "Você vai ver que coloquei um treino periodizado de 12 semanas. Foque em dar seu máximo para que cada treino seja desafiador a ponto do SEU CORPO PRECISAR ENTENDER QUE ELE TEM QUE EVOLUIR.",
-    },
-    {
-      type: "psicologa" as const,
-      title: "Mentorias com a Psicóloga",
-      content: "As mentorias com a psicóloga Josie são em grupo, toda última segunda-feira do mês às 20h00. Acesse pela Área de Membros.",
-      link: "#",
-      linkLabel: "Acessar Mentorias",
-    },
-  ],
-  faqs: [
-    { question: "Posso trocar a ordem das refeições?", answer: "Sim! Pode inverter a ordem quando for mais prático." },
-    { question: "Posso comer fora do horário?", answer: "Sim, os horários são um norte. O principal é consumir todos os alimentos no dia." },
-    { question: "E se tiver dificuldades?", answer: "Me chame no WhatsApp, não precisa esperar os Check-ins!" },
-  ],
-  supportHours: "Segunda à Sexta: 08h00 às 18h00",
-  whatsappUrl: "https://wa.me/5511999999999",
+import webdietTutorial from "@/assets/webdiet-tutorial.png";
+import mfitTutorial from "@/assets/mfit-tutorial.png";
+
+const objectiveLabels: Record<string, string> = {
+  emagrecimento: "Emagrecimento",
+  recomposicao: "Recomposição Corporal",
+  hipertrofia: "Hipertrofia",
+};
+
+const planLabels: Record<string, string> = {
+  shape: "Shape",
+  premium: "Premium",
+  premium_anual: "Premium Anual",
 };
 
 const StudentPage = () => {
   const { slug } = useParams();
+  const { data: page, isLoading, error } = useStudentPage(slug || "");
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen gradient-dark flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-gold animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !page) {
+    return (
+      <div className="min-h-screen gradient-dark flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <span className="font-display text-6xl gradient-gold-text">404</span>
+          <p className="text-white/50 text-sm mt-4">Página não encontrada ou ainda não publicada.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const cc = (page.custom_content || {}) as Record<string, any>;
+  const steps = cc.steps || [];
+  const guidelines = cc.guidelines || {};
+  const faqs = cc.faqs || [];
+  const optionalBlocks = cc.optionalBlocks || [];
+  const customLinks = cc.links || [];
+
+  // Build links array
+  const allLinks = [
+    ...(page.members_link
+      ? [{ label: "Área de Membros", url: page.members_link, icon: "members", description: "Módulos e orientações completas" }]
+      : []),
+    ...(page.support_link
+      ? [{ label: "Suporte WhatsApp", url: page.support_link, icon: "support", description: cc.supportHours || "" }]
+      : []),
+    ...customLinks,
+  ];
+
+  // Build credentials
+  const credentials = [];
+  if (page.has_apps) {
+    if (page.webdiet_login || page.webdiet_password) {
+      credentials.push({
+        appName: "WebDiet",
+        login: page.webdiet_login || "",
+        password: page.webdiet_password || "",
+        instructions: "Abra o app e clique em 'Já me consultei'",
+        tutorialImage: webdietTutorial,
+      });
+    }
+    if (page.mfit_login || page.mfit_password) {
+      credentials.push({
+        appName: "MFit Personal",
+        login: page.mfit_login || "",
+        password: page.mfit_password || "",
+        instructions: "Clique em 'Sou aluno' e entre com os dados",
+        tutorialImage: mfitTutorial,
+      });
+    }
+  }
+
+  // Extract first name
+  const firstName = page.student_name.split(" ")[0];
+
+  const sectionOrder: string[] = cc.sectionOrder || DEFAULT_SECTION_ORDER;
+
+  const renderSection = (section: string) => {
+    switch (section) {
+      case "summary":
+        return (
+          <PlanSummary
+            key="summary"
+            objective={objectiveLabels[page.objective] || page.objective}
+            plan={planLabels[page.plan] || page.plan}
+            duration={page.duration || undefined}
+            strategy={page.strategy || undefined}
+          />
+        );
+      case "steps":
+        return steps.length > 0 ? <NextSteps key="steps" steps={steps} hideTitle={cc.hideStepsTitle} title={cc.stepsTitle} /> : null;
+      case "links":
+        return allLinks.length > 0 ? <LinksBlock key="links" links={allLinks} /> : null;
+      case "credentials":
+        return credentials.length > 0 ? (
+          <section key="credentials" className="px-4 sm:px-8 py-8 bg-background">
+            <div className="max-w-lg mx-auto space-y-4">
+              <h3 className="font-display text-2xl text-foreground">🔐 CREDENCIAIS DE ACESSO</h3>
+              {credentials.map((cred, i) => (
+                <CredentialsBlock key={i} {...cred} />
+              ))}
+            </div>
+          </section>
+        ) : null;
+      case "guidelines":
+        return (guidelines.content || (guidelines.highlights && guidelines.highlights.length > 0)) ? (
+          <GuidelinesBlock
+            key="guidelines"
+            content={guidelines.content || ""}
+            highlights={guidelines.highlights || []}
+          />
+        ) : null;
+      case "optionalBlocks":
+        return optionalBlocks.length > 0 ? <OptionalBlocks key="optionalBlocks" blocks={optionalBlocks} /> : null;
+      case "support":
+        return (
+          <SupportSection
+            key="support"
+            whatsappUrl={cc.whatsappUrl || page.support_link || undefined}
+            faqs={faqs.length > 0 ? faqs : undefined}
+            supportHours={cc.supportHours || undefined}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Toaster position="top-center" />
-      
+
       <HeroSection
-        studentName={demoData.studentName}
-        objective={demoData.objective}
+        studentName={firstName}
+        objective={objectiveLabels[page.objective] || page.objective}
       />
 
-      <PlanSummary
-        objective={demoData.objective}
-        plan={demoData.plan}
-        duration={demoData.duration}
-        strategy={demoData.strategy}
-      />
-
-      <NextSteps steps={demoData.steps} />
-
-      <LinksBlock links={demoData.links} />
-
-      <section className="px-4 sm:px-8 py-8 bg-background">
-        <div className="max-w-lg mx-auto space-y-4">
-          <h3 className="font-display text-2xl text-foreground">🔐 CREDENCIAIS DE ACESSO</h3>
-          {demoData.credentials.map((cred, i) => (
-            <CredentialsBlock key={i} {...cred} />
-          ))}
-        </div>
-      </section>
-
-      <GuidelinesBlock
-        content={demoData.guidelines.content}
-        highlights={demoData.guidelines.highlights}
-      />
-
-      <OptionalBlocks blocks={demoData.optionalBlocks} />
-
-      <SupportSection
-        whatsappUrl={demoData.whatsappUrl}
-        faqs={demoData.faqs}
-        supportHours={demoData.supportHours}
-      />
+      {sectionOrder.map(renderSection)}
 
       <FooterSection />
     </div>

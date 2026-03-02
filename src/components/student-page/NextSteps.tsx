@@ -8,9 +8,11 @@ interface Step {
 
 interface NextStepsProps {
   steps: Step[];
+  hideTitle?: boolean;
+  title?: string;
 }
 
-const NextSteps = ({ steps }: NextStepsProps) => {
+const NextSteps = ({ steps, hideTitle, title }: NextStepsProps) => {
   return (
     <section className="px-4 sm:px-8 py-10 gradient-dark">
       <div className="max-w-lg mx-auto">
@@ -20,7 +22,7 @@ const NextSteps = ({ steps }: NextStepsProps) => {
           viewport={{ once: true }}
           className="font-display text-2xl sm:text-3xl text-white mb-6"
         >
-          📋 PRÓXIMOS PASSOS
+          {title || "📋 PRÓXIMOS PASSOS"}
         </motion.h3>
 
         <div className="space-y-4">
@@ -39,8 +41,10 @@ const NextSteps = ({ steps }: NextStepsProps) => {
                 </div>
               </div>
               <div className="flex-1 pb-4 border-b border-white/10">
-                <h4 className="font-semibold text-white text-sm">{step.title}</h4>
-                <p className="text-white/60 text-sm mt-1">{step.description}</p>
+                {!hideTitle && step.title && (
+                  <h4 className="font-semibold text-white text-sm">{step.title}</h4>
+                )}
+                <div className="text-white text-sm mt-1 quill-content force-white-text" dangerouslySetInnerHTML={{ __html: step.description }} />
               </div>
             </motion.div>
           ))}

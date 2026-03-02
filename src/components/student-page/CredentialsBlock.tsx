@@ -8,9 +8,10 @@ interface CredentialsBlockProps {
   login: string;
   password: string;
   instructions?: string;
+  tutorialImage?: string;
 }
 
-const CredentialsBlock = ({ appName, login, password, instructions }: CredentialsBlockProps) => {
+const CredentialsBlock = ({ appName, login, password, instructions, tutorialImage }: CredentialsBlockProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const copyToClipboard = (text: string, label: string) => {
@@ -45,29 +46,41 @@ const CredentialsBlock = ({ appName, login, password, instructions }: Credential
           </button>
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-md bg-secondary">
-          <div>
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Senha</span>
-            <p className="text-sm font-mono font-semibold text-foreground">
-              {showPassword ? password : "••••••••"}
-            </p>
+        {password && (
+          <div className="flex items-center justify-between p-3 rounded-md bg-secondary">
+            <div>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Senha</span>
+              <p className="text-sm font-mono font-semibold text-foreground">
+                {showPassword ? password : "••••••••"}
+              </p>
+            </div>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setShowPassword(!showPassword)}
+                className="p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={() => copyToClipboard(password, "Senha")}
+                className="p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <div className="flex gap-1">
-            <button
-              onClick={() => setShowPassword(!showPassword)}
-              className="p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-            >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={() => copyToClipboard(password, "Senha")}
-              className="p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-            >
-              <Copy className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        )}
       </div>
+
+      {tutorialImage && (
+        <div className="mt-5 rounded-lg overflow-hidden border border-border">
+          <img
+            src={tutorialImage}
+            alt={`Tutorial ${appName}`}
+            className="w-full h-auto object-cover"
+          />
+        </div>
+      )}
     </motion.div>
   );
 };

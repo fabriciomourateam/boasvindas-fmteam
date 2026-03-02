@@ -82,7 +82,7 @@ const PlanSummary = ({ objective, plan, duration, strategy }: PlanSummaryProps) 
             className="p-5 rounded-lg border border-gold/20 bg-gold/5"
           >
             <h4 className="font-semibold text-sm uppercase tracking-wider text-gold-dark mb-2">🧠 Estratégia Inicial</h4>
-            <p className="text-foreground/80 text-sm leading-relaxed">{strategy}</p>
+            <div className="text-foreground/80 text-sm leading-relaxed quill-content" dangerouslySetInnerHTML={{ __html: strategy }} />
           </motion.div>
         )}
       </div>

@@ -7,6 +7,7 @@ interface OptionalBlock {
   content: string;
   link?: string;
   linkLabel?: string;
+  imageUrl?: string;
 }
 
 interface OptionalBlocksProps {
@@ -50,8 +51,13 @@ const OptionalBlocks = ({ blocks }: OptionalBlocksProps) => {
               <div className="text-white">{blockIcons[block.type] || blockIcons.extras}</div>
               <h4 className="font-display text-xl text-white">{block.title}</h4>
             </div>
+            {block.imageUrl && (
+              <div className="w-full h-48 sm:h-64 overflow-hidden border-b border-border">
+                <img src={block.imageUrl} alt={block.title} className="w-full h-full object-cover" />
+              </div>
+            )}
             <div className="p-5">
-              <p className="text-foreground/80 text-sm leading-relaxed whitespace-pre-line">{block.content}</p>
+              <div className="text-foreground/80 text-sm leading-relaxed quill-content" dangerouslySetInnerHTML={{ __html: block.content }} />
               {block.link && (
                 <a
                   href={block.link}

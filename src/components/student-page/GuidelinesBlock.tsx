@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface GuidelinesBlockProps {
   title?: string;
@@ -22,18 +22,22 @@ const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, conte
             {icon || ""} {title}
           </h3>
 
-          <div className="text-foreground/80 text-sm leading-relaxed whitespace-pre-line">
-            {content}
-          </div>
+          <div
+            className="text-foreground/80 text-sm leading-relaxed quill-content"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
 
           {highlights && highlights.length > 0 && (
             <div className="mt-4 space-y-2">
-              {highlights.map((item, index) => (
-                <div key={index} className="flex gap-2 items-start">
-                  <AlertCircle className="w-4 h-4 text-gold-dark mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-foreground/80">{item}</p>
-                </div>
-              ))}
+              <h4 className="font-semibold text-foreground mb-4">DESTAQUE</h4>
+              <ul className="space-y-3">
+                {highlights.map((highlight, index) => (
+                  <li key={index} className="flex gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-gold flex-shrink-0" />
+                    <div className="text-foreground/80 text-sm quill-content leading-tight" dangerouslySetInnerHTML={{ __html: highlight }} />
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </motion.div>
