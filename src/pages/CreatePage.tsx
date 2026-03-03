@@ -123,6 +123,7 @@ const CreatePage = () => {
 
   const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(false);
   const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(false);
+  const [isStandardBlocksCollapsed, setIsStandardBlocksCollapsed] = useState(true);
   const toggleStepCollapse = (i: number) => {
     const novoEstado = { ...form.collapsedSteps, [i]: !form.collapsedSteps[i] };
     update("collapsedSteps", novoEstado);
@@ -636,44 +637,42 @@ const CreatePage = () => {
                                     <div
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
-                                      className={`flex gap-2 p-3 rounded-lg border transition-colors ${snapshot.isDragging ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10" : "bg-card border-border"}`}
+                                      className={`p-3 rounded-lg border transition-colors ${snapshot.isDragging ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10" : "bg-card border-border"}`}
                                     >
-                                      <div className="flex-1 space-y-2">
-                                        <div className="flex items-center gap-2">
-                                          <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-gold p-1 -ml-1">
-                                            <GripVertical className="w-4 h-4" />
-                                          </div>
-                                          <button
-                                            type="button"
-                                            onClick={() => toggleStepCollapse(i)}
-                                            className="p-1.5 hover:bg-secondary rounded-lg transition-colors text-muted-foreground shrink-0 border border-border bg-background focus:outline-none"
-                                          >
-                                            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                          </button>
-                                          <input value={step.title} onChange={(e) => updateStep(i, "title", e.target.value)} className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground font-medium" placeholder="Título do passo" />
+                                      <div className="flex items-center gap-2">
+                                        <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-gold p-1 -ml-1 shrink-0">
+                                          <GripVertical className="w-4 h-4" />
                                         </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => toggleStepCollapse(i)}
+                                          className="p-1.5 hover:bg-secondary rounded-lg transition-colors text-muted-foreground shrink-0 border border-border bg-background focus:outline-none"
+                                        >
+                                          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                        </button>
+                                        <input value={step.title} onChange={(e) => updateStep(i, "title", e.target.value)} className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground font-medium" placeholder="Título do passo" />
+                                        <div className="flex gap-1 shrink-0 ml-auto">
+                                          <button onClick={() => duplicateStep(i)} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md" title="Duplicar">
+                                            <Copy className="w-4 h-4" />
+                                          </button>
+                                          <button onClick={() => removeStep(i)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-secondary rounded-md" title="Excluir">
+                                            <Trash2 className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                      </div>
 
-                                        <AnimatePresence>
-                                          {!isCollapsed && (
-                                            <motion.div
-                                              initial={{ height: 0, opacity: 0 }}
-                                              animate={{ height: "auto", opacity: 1 }}
-                                              exit={{ height: 0, opacity: 0 }}
-                                              className="overflow-hidden pt-2"
-                                            >
-                                              <RichTextEditor value={step.description} onChange={(val) => updateStep(i, "description", val)} placeholder="Descrição com formatação (suporta tópicos, negrito)..." />
-                                            </motion.div>
-                                          )}
-                                        </AnimatePresence>
-                                      </div>
-                                      <div className="flex flex-col gap-1 shrink-0 pt-1">
-                                        <button onClick={() => duplicateStep(i)} className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="Duplicar">
-                                          <Copy className="w-4 h-4" />
-                                        </button>
-                                        <button onClick={() => removeStep(i)} className="p-2 text-muted-foreground hover:text-destructive transition-colors" title="Excluir">
-                                          <Trash2 className="w-4 h-4" />
-                                        </button>
-                                      </div>
+                                      <AnimatePresence>
+                                        {!isCollapsed && (
+                                          <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: "auto", opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden pt-3 border-t border-border mt-3"
+                                          >
+                                            <RichTextEditor value={step.description} onChange={(val) => updateStep(i, "description", val)} placeholder="Descrição com formatação (suporta tópicos, negrito)..." />
+                                          </motion.div>
+                                        )}
+                                      </AnimatePresence>
                                     </div>
                                   )}
                                 </Draggable>
@@ -714,22 +713,45 @@ const CreatePage = () => {
                           className="space-y-6 overflow-hidden mt-4 pt-4 border-t border-border"
                         >
                           <div className="space-y-3">
-                            <h3 className="text-xs text-muted-foreground font-medium mb-2">Blocos Padrões (Apps e Credenciais)</h3>
-                            {[
-                              { key: "hasTreino", label: "Treino" },
-                              { key: "hasPsicologa", label: "Psicóloga" },
-                              { key: "hasBioimpedancia", label: "Bioimpedância" },
-                              { key: "hasAreaMembros", label: "Área de Membros" },
-                              { key: "hasApps", label: "Apps (WebDiet / MFit)" },
-                            ].map(({ key, label }) => (
-                              <label key={key} className="flex items-center justify-between p-3 rounded-md bg-secondary cursor-pointer">
-                                <span className="text-sm text-foreground">{label}</span>
-                                <input type="checkbox" checked={(form as any)[key]} onChange={(e) => update(key as any, e.target.checked)} className="w-5 h-5 rounded accent-gold" />
-                              </label>
-                            ))}
+                            <div
+                              className="flex items-center justify-between cursor-pointer group"
+                              onClick={() => setIsStandardBlocksCollapsed(!isStandardBlocksCollapsed)}
+                            >
+                              <h3 className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">Blocos Padrões (Apps e Credenciais)</h3>
+                              <button
+                                type="button"
+                                className="p-1 hover:bg-background rounded-md transition-colors text-muted-foreground focus:outline-none"
+                              >
+                                {isStandardBlocksCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                              </button>
+                            </div>
+
+                            <AnimatePresence>
+                              {!isStandardBlocksCollapsed && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="space-y-3 overflow-hidden"
+                                >
+                                  {[
+                                    { key: "hasTreino", label: "Treino" },
+                                    { key: "hasPsicologa", label: "Psicóloga" },
+                                    { key: "hasBioimpedancia", label: "Bioimpedância" },
+                                    { key: "hasAreaMembros", label: "Área de Membros" },
+                                    { key: "hasApps", label: "Apps (WebDiet / MFit)" },
+                                  ].map(({ key, label }) => (
+                                    <label key={key} className="flex items-center justify-between p-3 rounded-md bg-background cursor-pointer border border-border">
+                                      <span className="text-sm text-foreground">{label}</span>
+                                      <input type="checkbox" checked={(form as any)[key]} onChange={(e) => update(key as any, e.target.checked)} className="w-5 h-5 rounded accent-gold" />
+                                    </label>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
 
-                          <div className="pt-2">
+                          <div className="pt-2 border-t border-border mt-6">
                             <h3 className="text-xs text-muted-foreground font-medium mb-4">Blocos 100% Customizados</h3>
                             <SortableCustomBlocks
                               blocks={form.optionalBlocks as any}

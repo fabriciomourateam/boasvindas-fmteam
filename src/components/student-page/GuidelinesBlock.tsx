@@ -36,7 +36,7 @@ const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, conte
                   return (
                     <li key={index} className="flex gap-3">
                       <CheckCircle2 className="w-5 h-5 text-gold flex-shrink-0" />
-                      <div className="text-foreground/80 text-sm quill-content leading-tight" dangerouslySetInnerHTML={{ __html: contentHtml }} />
+                      <div className="text-foreground text-sm quill-content leading-tight" dangerouslySetInnerHTML={{ __html: contentHtml }} />
                     </li>
                   );
                 })}

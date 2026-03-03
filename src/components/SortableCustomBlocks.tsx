@@ -109,13 +109,13 @@ const SortableCustomBlocks = ({ blocks, collapsedState, onChange, onCollapseChan
                                         <div
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
-                                            className={`p-4 rounded-lg border transition-colors ${snapshot.isDragging
+                                            className={`p-3 rounded-lg border transition-colors ${snapshot.isDragging
                                                 ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10"
                                                 : "bg-secondary border-border"
                                                 }`}
                                         >
                                             {/* Header do Bloco (Sempre visível) */}
-                                            <div className="flex items-center gap-2 mb-2">
+                                            <div className="flex items-center gap-2">
                                                 <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-gold p-1">
                                                     <GripVertical className="w-4 h-4" />
                                                 </div>
