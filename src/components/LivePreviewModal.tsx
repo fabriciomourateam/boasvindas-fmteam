@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Eye } from "lucide-react";
 import HeroSection from "@/components/student-page/HeroSection";
 import PlanSummary from "@/components/student-page/PlanSummary";
@@ -155,6 +155,7 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
             </DialogTrigger>
             {/* Usando max-w-[480px] para simular a visualização de celular */}
             <DialogContent className="max-w-[480px] w-full h-[90vh] overflow-y-auto p-0 gap-0 bg-background border border-border sm:rounded-xl">
+                <DialogTitle className="sr-only">Live Preview do Plano do Aluno</DialogTitle>
                 <div className="min-h-full bg-background pb-10">
                     <HeroSection
                         studentName={firstName}

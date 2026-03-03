@@ -109,8 +109,8 @@ const SortableCustomBlocks = ({ blocks, onChange }: SortableCustomBlocksProps) =
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
                                             className={`p-4 rounded-lg border transition-colors ${snapshot.isDragging
-                                                    ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10"
-                                                    : "bg-secondary border-border"
+                                                ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10"
+                                                : "bg-secondary border-border"
                                                 }`}
                                         >
                                             {/* Header do Bloco (Sempre visível) */}
@@ -136,6 +136,7 @@ const SortableCustomBlocks = ({ blocks, onChange }: SortableCustomBlocksProps) =
                                                     <option value="bioimpedancia">Bioimpedância</option>
                                                     <option value="area_membros">Área de Membros</option>
                                                     <option value="apps">Apps</option>
+                                                    <option value="checkin">Check-in</option>
                                                     <option value="extras">Extras</option>
                                                 </select>
 

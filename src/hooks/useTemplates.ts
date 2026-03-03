@@ -35,6 +35,7 @@ export interface TemplateContent {
     stepsTitle?: string;
     hideStepsTitle?: boolean;
     collapsedSteps?: Record<number, boolean>;
+    collapsedHighlights?: Record<number, boolean>;
 }
 
 export interface TemplateBlocks {

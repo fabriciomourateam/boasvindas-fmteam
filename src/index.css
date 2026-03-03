@@ -134,6 +134,69 @@
   .force-white-text * {
     color: white !important;
   }
+
+  /* Botões Premium Customizados (Geral) */
+  .btn-premium {
+    @apply relative overflow-hidden bg-gradient-to-r from-gold-dark to-primary text-primary-foreground font-semibold px-6 py-3 rounded-xl shadow-lg transition-transform hover:scale-[1.02] hover:shadow-gold flex items-center justify-center gap-2 border border-gold/50 no-underline !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Aplica o estilo premium em TODOS OS LINKS do rich text (para forçar o visual de botão) */
+  .quill-content a {
+    @apply relative overflow-hidden bg-gradient-to-r from-gold-dark to-primary text-primary-foreground font-semibold px-6 py-3 rounded-xl shadow-lg transition-transform hover:scale-[1.02] hover:shadow-gold flex items-center justify-center gap-2 border border-gold/50 no-underline text-center !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    display: inline-flex !important;
+    margin: 0.5rem 0.25rem !important;
+    width: auto !important;
+    min-width: 140px;
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  .btn-premium-secondary {
+    @apply relative overflow-hidden bg-secondary border border-gold/30 text-foreground font-semibold px-6 py-3 rounded-xl transition-all hover:scale-[1.02] hover:border-gold/70 flex items-center justify-center gap-2 no-underline !important;
+    display: inline-flex !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.05);
+  }
+
+  .btn-premium-secondary:hover {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+  }
+
+  /* Efeito de Reflexo (Shimmer) */
+  .btn-premium::after,
+  .btn-premium-secondary::after,
+  .quill-content a::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(to bottom right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(255, 255, 255, 0) 60%,
+        rgba(255, 255, 255, 0) 100%);
+    transform: rotate(45deg) translate(-100%, -100%);
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: rotate(45deg) translate(-100%, -100%);
+    }
+
+    20% {
+      transform: rotate(45deg) translate(100%, 100%);
+    }
+
+    100% {
+      transform: rotate(45deg) translate(200%, 200%);
+    }
+  }
 }
 
 /* React Quill Dark Mode Adjustments */

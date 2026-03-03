@@ -63,6 +63,7 @@ interface TemplateForm {
     }>;
     sectionOrder: string[];
     collapsedSteps: Record<number, boolean>;
+    collapsedHighlights: Record<number, boolean>;
 }
 
 const defaultForm: TemplateForm = {
@@ -92,6 +93,7 @@ const defaultForm: TemplateForm = {
     links: [],
     sectionOrder: DEFAULT_SECTION_ORDER,
     collapsedSteps: {},
+    collapsedHighlights: {},
 };
 
 const EditTemplate = () => {
@@ -109,6 +111,11 @@ const EditTemplate = () => {
     const toggleStepCollapse = (i: number) => {
         const novoEstado = { ...form.collapsedSteps, [i]: !form.collapsedSteps[i] };
         update("collapsedSteps", novoEstado);
+    };
+
+    const toggleHighlightCollapse = (i: number) => {
+        const novoEstado = { ...form.collapsedHighlights, [i]: !form.collapsedHighlights[i] };
+        update("collapsedHighlights", novoEstado);
     };
 
     const { data: existingTemplate } = useTemplate(id || duplicateId || "");
@@ -147,6 +154,7 @@ const EditTemplate = () => {
                 links: content.links || [],
                 sectionOrder: content.sectionOrder || DEFAULT_SECTION_ORDER,
                 collapsedSteps: content.collapsedSteps || {},
+                collapsedHighlights: content.collapsedHighlights || {},
             });
         }
     }, [existingTemplate, duplicateId]);
@@ -183,6 +191,7 @@ const EditTemplate = () => {
             notes: form.notes,
             sectionOrder: form.sectionOrder,
             collapsedSteps: form.collapsedSteps,
+            collapsedHighlights: form.collapsedHighlights,
         };
 
         const blocks: TemplateBlocks = {
@@ -530,16 +539,41 @@ const EditTemplate = () => {
                                                 <Plus className="w-3 h-3" /> Adicionar
                                             </button>
                                         </div>
-                                        {form.guidelinesHighlights.map((h, i) => (
-                                            <div key={i} className="flex gap-2">
-                                                <div className="flex-1">
-                                                    <RichTextEditor value={h} onChange={(val) => { const arr = [...form.guidelinesHighlights]; arr[i] = val; update("guidelinesHighlights", arr); }} placeholder="Destaque com suporte a negrito e cores..." />
+                                        {form.guidelinesHighlights.map((h, i) => {
+                                            const isCollapsed = form.collapsedHighlights[i];
+                                            return (
+                                                <div key={i} className="flex gap-2">
+                                                    <div className="flex-1 space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => toggleHighlightCollapse(i)}
+                                                                className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground shrink-0 border border-border bg-background focus:outline-none"
+                                                            >
+                                                                {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                            </button>
+                                                            <span className="text-sm font-medium text-foreground w-full">Destaque {i + 1}</span>
+                                                        </div>
+
+                                                        <AnimatePresence>
+                                                            {!isCollapsed && (
+                                                                <motion.div
+                                                                    initial={{ height: 0, opacity: 0 }}
+                                                                    animate={{ height: "auto", opacity: 1 }}
+                                                                    exit={{ height: 0, opacity: 0 }}
+                                                                    className="overflow-hidden"
+                                                                >
+                                                                    <RichTextEditor value={h} onChange={(val) => { const arr = [...form.guidelinesHighlights]; arr[i] = val; update("guidelinesHighlights", arr); }} placeholder="Destaque com suporte a negrito e cores..." />
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                    <button onClick={() => removeHighlight(i)} className="p-2 text-muted-foreground hover:text-destructive self-start pt-1">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
                                                 </div>
-                                                <button onClick={() => removeHighlight(i)} className="p-2 text-muted-foreground hover:text-destructive self-start">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
                                 );
                             case "support":
