@@ -42,6 +42,7 @@ interface TemplateForm {
     webdietPassword: string;
     mfitLogin: string;
     mfitPassword: string;
+    membersLink: string;
     steps: Array<{ title: string; description: string }>;
     stepsTitle: string;
     hideStepsTitle: boolean;
@@ -85,6 +86,7 @@ const defaultForm: TemplateForm = {
     webdietPassword: "",
     mfitLogin: "",
     mfitPassword: "",
+    membersLink: "",
     steps: [],
     stepsTitle: "📋 PRÓXIMOS PASSOS",
     hideStepsTitle: false,
@@ -147,6 +149,7 @@ const EditTemplate = () => {
                 webdietPassword: content.credentials?.webdietPassword || "",
                 mfitLogin: content.credentials?.mfitLogin || "",
                 mfitPassword: content.credentials?.mfitPassword || "",
+                membersLink: content.membersLink || "",
                 steps: content.steps || [],
                 stepsTitle: content.stepsTitle || "📋 PRÓXIMOS PASSOS",
                 hideStepsTitle: content.hideStepsTitle ?? false,
@@ -192,6 +195,7 @@ const EditTemplate = () => {
                 mfitLogin: form.mfitLogin,
                 mfitPassword: form.mfitPassword,
             },
+            membersLink: form.membersLink,
             supportHours: form.supportHours,
             whatsappUrl: form.whatsappUrl,
             notes: form.notes,
@@ -557,6 +561,10 @@ const EditTemplate = () => {
                                             </button>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="text-xs text-muted-foreground font-medium">Área de Membros</label>
+                                                <input value={form.membersLink} onChange={(e) => update("membersLink", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="https://..." />
+                                            </div>
                                             <div>
                                                 <label className="text-xs text-muted-foreground font-medium">WhatsApp Suporte</label>
                                                 <input value={form.whatsappUrl} onChange={(e) => update("whatsappUrl", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="https://wa.me/..." />

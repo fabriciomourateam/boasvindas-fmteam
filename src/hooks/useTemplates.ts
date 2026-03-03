@@ -28,6 +28,7 @@ export interface TemplateContent {
         mfitLogin?: string;
         mfitPassword?: string;
     };
+    membersLink?: string;
     supportHours?: string;
     whatsappUrl?: string;
     notes?: string;
