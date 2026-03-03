@@ -64,6 +64,7 @@ interface TemplateForm {
     sectionOrder: string[];
     collapsedSteps: Record<number, boolean>;
     collapsedHighlights: Record<number, boolean>;
+    collapsedOptionalBlocks: Record<number, boolean>;
 }
 
 const defaultForm: TemplateForm = {
@@ -94,6 +95,7 @@ const defaultForm: TemplateForm = {
     sectionOrder: DEFAULT_SECTION_ORDER,
     collapsedSteps: {},
     collapsedHighlights: {},
+    collapsedOptionalBlocks: {},
 };
 
 const EditTemplate = () => {
@@ -155,6 +157,7 @@ const EditTemplate = () => {
                 sectionOrder: content.sectionOrder || DEFAULT_SECTION_ORDER,
                 collapsedSteps: content.collapsedSteps || {},
                 collapsedHighlights: content.collapsedHighlights || {},
+                collapsedOptionalBlocks: content.collapsedOptionalBlocks || {},
             });
         }
     }, [existingTemplate, duplicateId]);
@@ -192,6 +195,7 @@ const EditTemplate = () => {
             sectionOrder: form.sectionOrder,
             collapsedSteps: form.collapsedSteps,
             collapsedHighlights: form.collapsedHighlights,
+            collapsedOptionalBlocks: form.collapsedOptionalBlocks,
         };
 
         const blocks: TemplateBlocks = {
@@ -462,7 +466,9 @@ const EditTemplate = () => {
                                                         <h3 className="text-xs text-muted-foreground font-medium mb-4">Blocos 100% Customizados</h3>
                                                         <SortableCustomBlocks
                                                             blocks={form.optionalBlocks as any}
+                                                            collapsedState={form.collapsedOptionalBlocks}
                                                             onChange={(blocks) => update("optionalBlocks", blocks)}
+                                                            onCollapseChange={(newState) => update("collapsedOptionalBlocks", newState)}
                                                         />
                                                     </div>
                                                 </motion.div>

@@ -73,6 +73,7 @@ interface FormState {
   sectionOrder: string[];
   collapsedSteps: Record<number, boolean>;
   collapsedHighlights: Record<number, boolean>;
+  collapsedOptionalBlocks: Record<number, boolean>;
 }
 
 const defaultForm: FormState = {
@@ -107,6 +108,7 @@ const defaultForm: FormState = {
   sectionOrder: DEFAULT_SECTION_ORDER,
   collapsedSteps: {},
   collapsedHighlights: {},
+  collapsedOptionalBlocks: {},
 };
 
 const CreatePage = () => {
@@ -174,6 +176,7 @@ const CreatePage = () => {
         sectionOrder: cc.sectionOrder || DEFAULT_SECTION_ORDER,
         collapsedSteps: cc.collapsedSteps || {},
         collapsedHighlights: cc.collapsedHighlights || {},
+        collapsedOptionalBlocks: cc.collapsedOptionalBlocks || {},
       });
     }
   }, [isEditing, existingPage]);
@@ -222,6 +225,7 @@ const CreatePage = () => {
       sectionOrder: content.sectionOrder || prev.sectionOrder,
       collapsedSteps: content.collapsedSteps || prev.collapsedSteps,
       collapsedHighlights: content.collapsedHighlights || prev.collapsedHighlights,
+      collapsedOptionalBlocks: content.collapsedOptionalBlocks || prev.collapsedOptionalBlocks,
     }));
 
     toast.success("Template aplicado!");
@@ -245,6 +249,7 @@ const CreatePage = () => {
       sectionOrder: form.sectionOrder,
       collapsedSteps: form.collapsedSteps,
       collapsedHighlights: form.collapsedHighlights,
+      collapsedOptionalBlocks: form.collapsedOptionalBlocks,
     } as Json;
   };
 
@@ -331,6 +336,7 @@ const CreatePage = () => {
       sectionOrder: form.sectionOrder,
       collapsedSteps: form.collapsedSteps,
       collapsedHighlights: form.collapsedHighlights,
+      collapsedOptionalBlocks: form.collapsedOptionalBlocks,
     };
 
     const blocks: TemplateBlocks = {
@@ -653,7 +659,9 @@ const CreatePage = () => {
                             <h3 className="text-xs text-muted-foreground font-medium mb-4">Blocos 100% Customizados</h3>
                             <SortableCustomBlocks
                               blocks={form.optionalBlocks as any}
+                              collapsedState={form.collapsedOptionalBlocks}
                               onChange={(blocks) => update("optionalBlocks", blocks)}
+                              onCollapseChange={(newState) => update("collapsedOptionalBlocks", newState)}
                             />
                           </div>
                         </motion.div>

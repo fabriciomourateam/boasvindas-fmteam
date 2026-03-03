@@ -18,11 +18,12 @@ export interface CustomBlock {
 
 interface SortableCustomBlocksProps {
     blocks: CustomBlock[];
+    collapsedState: Record<number, boolean>;
     onChange: (newBlocks: CustomBlock[]) => void;
+    onCollapseChange: (newState: Record<number, boolean>) => void;
 }
 
-const SortableCustomBlocks = ({ blocks, onChange }: SortableCustomBlocksProps) => {
-    const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
+const SortableCustomBlocks = ({ blocks, collapsedState, onChange, onCollapseChange }: SortableCustomBlocksProps) => {
 
     const handleDragEnd = (result: DropResult) => {
         if (!result.destination) return;
@@ -45,9 +46,9 @@ const SortableCustomBlocks = ({ blocks, onChange }: SortableCustomBlocksProps) =
             else if (sourceIndex < destinationIndex && index >= sourceIndex && index < destinationIndex) oldIndex = index + 1;
             else if (sourceIndex > destinationIndex && index > destinationIndex && index <= sourceIndex) oldIndex = index - 1;
 
-            newCollapsed[index] = collapsed[oldIndex] || false;
+            newCollapsed[index] = collapsedState[oldIndex] || false;
         });
-        setCollapsed(newCollapsed);
+        onCollapseChange(newCollapsed);
 
         onChange(newBlocks);
     };
@@ -64,9 +65,9 @@ const SortableCustomBlocks = ({ blocks, onChange }: SortableCustomBlocksProps) =
         // Shift collapsed state
         const newCollapsed: Record<number, boolean> = {};
         newBlocks.forEach((_, idx) => {
-            newCollapsed[idx] = collapsed[idx >= i ? idx + 1 : idx] || false;
+            newCollapsed[idx] = collapsedState[idx >= i ? idx + 1 : idx] || false;
         });
-        setCollapsed(newCollapsed);
+        onCollapseChange(newCollapsed);
     };
 
     const duplicateBlock = (i: number) => {
@@ -78,11 +79,11 @@ const SortableCustomBlocks = ({ blocks, onChange }: SortableCustomBlocksProps) =
 
     const addBlock = () => {
         onChange([...blocks, { type: "extras", title: "", content: "" }]);
-        setCollapsed(prev => ({ ...prev, [blocks.length]: false })); // Novas entram abertas
+        onCollapseChange({ ...collapsedState, [blocks.length]: false }); // Novas entram abertas
     };
 
     const toggleCollapse = (i: number) => {
-        setCollapsed(prev => ({ ...prev, [i]: !prev[i] }));
+        onCollapseChange({ ...collapsedState, [i]: !collapsedState[i] });
     };
 
     return (
@@ -123,7 +124,7 @@ const SortableCustomBlocks = ({ blocks, onChange }: SortableCustomBlocksProps) =
                                                     onClick={() => toggleCollapse(i)}
                                                     className="p-1 hover:bg-background rounded-md text-foreground transition-colors"
                                                 >
-                                                    {collapsed[i] ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                    {collapsedState[i] ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                                 </button>
 
                                                 <select
@@ -159,7 +160,7 @@ const SortableCustomBlocks = ({ blocks, onChange }: SortableCustomBlocksProps) =
 
                                             {/* Corpo do Bloco (Colapsável) */}
                                             <AnimatePresence initial={false}>
-                                                {!collapsed[i] && (
+                                                {!collapsedState[i] && (
                                                     <motion.div
                                                         initial={{ height: 0, opacity: 0 }}
                                                         animate={{ height: "auto", opacity: 1 }}
