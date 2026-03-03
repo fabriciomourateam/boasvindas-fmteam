@@ -62,6 +62,7 @@ interface TemplateForm {
         description?: string;
     }>;
     sectionOrder: string[];
+    collapsedSteps: Record<number, boolean>;
 }
 
 const defaultForm: TemplateForm = {
@@ -90,6 +91,7 @@ const defaultForm: TemplateForm = {
     optionalBlocks: [],
     links: [],
     sectionOrder: DEFAULT_SECTION_ORDER,
+    collapsedSteps: {},
 };
 
 const EditTemplate = () => {
@@ -104,10 +106,9 @@ const EditTemplate = () => {
 
     const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(false);
     const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(false);
-    const [collapsedSteps, setCollapsedSteps] = useState<Record<number, boolean>>({});
-
     const toggleStepCollapse = (i: number) => {
-        setCollapsedSteps((prev) => ({ ...prev, [i]: !prev[i] }));
+        const novoEstado = { ...form.collapsedSteps, [i]: !form.collapsedSteps[i] };
+        update("collapsedSteps", novoEstado);
     };
 
     const { data: existingTemplate } = useTemplate(id || duplicateId || "");
@@ -145,6 +146,7 @@ const EditTemplate = () => {
                 optionalBlocks: blocks.optionalBlocks || [],
                 links: content.links || [],
                 sectionOrder: content.sectionOrder || DEFAULT_SECTION_ORDER,
+                collapsedSteps: content.collapsedSteps || {},
             });
         }
     }, [existingTemplate, duplicateId]);
@@ -180,6 +182,7 @@ const EditTemplate = () => {
             whatsappUrl: form.whatsappUrl,
             notes: form.notes,
             sectionOrder: form.sectionOrder,
+            collapsedSteps: form.collapsedSteps,
         };
 
         const blocks: TemplateBlocks = {
@@ -362,7 +365,7 @@ const EditTemplate = () => {
                                             <input value={form.stepsTitle} onChange={(e) => update("stepsTitle", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground font-semibold" placeholder="Título da Seção (ex: 📋 PRÓXIMOS PASSOS)" />
                                         </div>
                                         {form.steps.map((step, i) => {
-                                            const isCollapsed = collapsedSteps[i];
+                                            const isCollapsed = form.collapsedSteps[i];
                                             return (
                                                 <div key={i} className="flex gap-2">
                                                     <div className="flex-1 space-y-2">

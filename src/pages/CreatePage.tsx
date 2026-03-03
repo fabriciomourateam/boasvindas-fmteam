@@ -71,6 +71,7 @@ interface FormState {
     description?: string;
   }>;
   sectionOrder: string[];
+  collapsedSteps: Record<number, boolean>;
 }
 
 const defaultForm: FormState = {
@@ -103,6 +104,7 @@ const defaultForm: FormState = {
   optionalBlocks: [],
   links: [],
   sectionOrder: DEFAULT_SECTION_ORDER,
+  collapsedSteps: {},
 };
 
 const CreatePage = () => {
@@ -116,10 +118,9 @@ const CreatePage = () => {
 
   const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(false);
   const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(false);
-  const [collapsedSteps, setCollapsedSteps] = useState<Record<number, boolean>>({});
-
   const toggleStepCollapse = (i: number) => {
-    setCollapsedSteps((prev) => ({ ...prev, [i]: !prev[i] }));
+    const novoEstado = { ...form.collapsedSteps, [i]: !form.collapsedSteps[i] };
+    update("collapsedSteps", novoEstado);
   };
 
   const { data: templates = [] } = useTemplates();
@@ -164,6 +165,7 @@ const CreatePage = () => {
         optionalBlocks: cc.optionalBlocks || [],
         links: cc.links || [],
         sectionOrder: cc.sectionOrder || DEFAULT_SECTION_ORDER,
+        collapsedSteps: cc.collapsedSteps || {},
       });
     }
   }, [isEditing, existingPage]);
@@ -210,6 +212,7 @@ const CreatePage = () => {
       hasApps: blocks.hasApps ?? prev.hasApps,
       optionalBlocks: blocks.optionalBlocks || prev.optionalBlocks,
       sectionOrder: content.sectionOrder || prev.sectionOrder,
+      collapsedSteps: content.collapsedSteps || prev.collapsedSteps,
     }));
 
     toast.success("Template aplicado!");
@@ -231,6 +234,7 @@ const CreatePage = () => {
       optionalBlocks: form.optionalBlocks,
       links: form.links,
       sectionOrder: form.sectionOrder,
+      collapsedSteps: form.collapsedSteps,
     } as Json;
   };
 
@@ -315,6 +319,7 @@ const CreatePage = () => {
       whatsappUrl: form.whatsappUrl,
       notes: form.notes,
       sectionOrder: form.sectionOrder,
+      collapsedSteps: form.collapsedSteps,
     };
 
     const blocks: TemplateBlocks = {
@@ -549,7 +554,7 @@ const CreatePage = () => {
                       <input value={form.stepsTitle} onChange={(e) => update("stepsTitle", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground font-semibold" placeholder="Título da Seção (ex: 📋 PRÓXIMOS PASSOS)" />
                     </div>
                     {form.steps.map((step, i) => {
-                      const isCollapsed = collapsedSteps[i];
+                      const isCollapsed = form.collapsedSteps[i];
                       return (
                         <div key={i} className="flex gap-2">
                           <div className="flex-1 space-y-2">

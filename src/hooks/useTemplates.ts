@@ -34,6 +34,7 @@ export interface TemplateContent {
     sectionOrder?: string[];
     stepsTitle?: string;
     hideStepsTitle?: boolean;
+    collapsedSteps?: Record<number, boolean>;
 }
 
 export interface TemplateBlocks {
