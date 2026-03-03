@@ -8,6 +8,7 @@ import GuidelinesBlock from "@/components/student-page/GuidelinesBlock";
 import OptionalBlocks from "@/components/student-page/OptionalBlocks";
 import SupportSection from "@/components/student-page/SupportSection";
 import FooterSection from "@/components/student-page/FooterSection";
+import ShareButton from "@/components/student-page/ShareButton";
 import { Toaster } from "sonner";
 import { useStudentPage } from "@/hooks/useStudentPages";
 import { Loader2 } from "lucide-react";
@@ -163,6 +164,8 @@ const StudentPage = () => {
       {sectionOrder.map(renderSection)}
 
       <FooterSection />
+
+      <ShareButton studentName={firstName} />
     </div>
   );
 };
