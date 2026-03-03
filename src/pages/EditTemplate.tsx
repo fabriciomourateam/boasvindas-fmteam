@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, X, GripVertical, Copy, ChevronDown, ChevronRight } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { useRequireAuth } from "@/hooks/useAuth";
 import {
     useTemplate,
@@ -45,7 +46,7 @@ interface TemplateForm {
     stepsTitle: string;
     hideStepsTitle: boolean;
     guidelinesContent: string;
-    guidelinesHighlights: string[];
+    guidelinesHighlights: Array<{ title: string; content: string }>;
     faqs: Array<{ question: string; answer: string }>;
     optionalBlocks: Array<{
         type: string;
@@ -150,7 +151,9 @@ const EditTemplate = () => {
                 stepsTitle: content.stepsTitle || "📋 PRÓXIMOS PASSOS",
                 hideStepsTitle: content.hideStepsTitle ?? false,
                 guidelinesContent: content.guidelines?.content || "",
-                guidelinesHighlights: content.guidelines?.highlights || [],
+                guidelinesHighlights: (content.guidelines?.highlights || []).map((h: any) =>
+                    typeof h === "string" ? { title: "Destaque", content: h } : h
+                ),
                 faqs: content.faqs || [],
                 optionalBlocks: blocks.optionalBlocks || [],
                 links: content.links || [],
@@ -245,8 +248,32 @@ const EditTemplate = () => {
     const updateStep = (i: number, field: string, value: string) =>
         update("steps", form.steps.map((s, idx) => (idx === i ? { ...s, [field]: value } : s)));
 
-    const addHighlight = () => update("guidelinesHighlights", [...form.guidelinesHighlights, ""]);
+    const addHighlight = () => update("guidelinesHighlights", [...form.guidelinesHighlights, { title: `Destaque ${form.guidelinesHighlights.length + 1}`, content: "" }]);
     const removeHighlight = (i: number) => update("guidelinesHighlights", form.guidelinesHighlights.filter((_, idx) => idx !== i));
+
+    const handleDragHighlight = (result: DropResult) => {
+        if (!result.destination) return;
+        const sourceIndex = result.source.index;
+        const destinationIndex = result.destination.index;
+        if (sourceIndex === destinationIndex) return;
+
+        const newHighlights = Array.from(form.guidelinesHighlights);
+        const [reordered] = newHighlights.splice(sourceIndex, 1);
+        newHighlights.splice(destinationIndex, 0, reordered);
+
+        // Adjust collapsed states
+        const newCollapsed: Record<number, boolean> = {};
+        newHighlights.forEach((_, index) => {
+            let oldIndex = index;
+            if (index === destinationIndex) oldIndex = sourceIndex;
+            else if (sourceIndex < destinationIndex && index >= sourceIndex && index < destinationIndex) oldIndex = index + 1;
+            else if (sourceIndex > destinationIndex && index > destinationIndex && index <= sourceIndex) oldIndex = index - 1;
+            newCollapsed[index] = form.collapsedHighlights[oldIndex] || false;
+        });
+
+        update("collapsedHighlights", newCollapsed);
+        update("guidelinesHighlights", newHighlights);
+    };
 
     const addFaq = () => update("faqs", [...form.faqs, { question: "", answer: "" }]);
     const removeFaq = (i: number) => update("faqs", form.faqs.filter((_, idx) => idx !== i));
@@ -545,41 +572,70 @@ const EditTemplate = () => {
                                                 <Plus className="w-3 h-3" /> Adicionar
                                             </button>
                                         </div>
-                                        {form.guidelinesHighlights.map((h, i) => {
-                                            const isCollapsed = form.collapsedHighlights[i];
-                                            return (
-                                                <div key={i} className="flex gap-2">
-                                                    <div className="flex-1 space-y-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => toggleHighlightCollapse(i)}
-                                                                className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground shrink-0 border border-border bg-background focus:outline-none"
-                                                            >
-                                                                {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                                            </button>
-                                                            <span className="text-sm font-medium text-foreground w-full">Destaque {i + 1}</span>
-                                                        </div>
+                                        <DragDropContext onDragEnd={handleDragHighlight}>
+                                            <Droppable droppableId="highlights-list">
+                                                {(provided) => (
+                                                    <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3 mt-4">
+                                                        {form.guidelinesHighlights.map((h, i) => {
+                                                            const isCollapsed = form.collapsedHighlights[i];
+                                                            return (
+                                                                <Draggable key={`highlight-${i}`} draggableId={`highlight-${i}`} index={i}>
+                                                                    {(provided, snapshot) => (
+                                                                        <div
+                                                                            ref={provided.innerRef}
+                                                                            {...provided.draggableProps}
+                                                                            className={`flex gap-2 p-3 rounded-lg border transition-colors ${snapshot.isDragging ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10" : "bg-card border-border"}`}
+                                                                        >
+                                                                            <div className="flex-1 space-y-2">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-gold p-1 -ml-1">
+                                                                                        <GripVertical className="w-4 h-4" />
+                                                                                    </div>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => toggleHighlightCollapse(i)}
+                                                                                        className="p-1.5 hover:bg-secondary rounded-lg transition-colors text-muted-foreground shrink-0 border border-border bg-background focus:outline-none"
+                                                                                    >
+                                                                                        {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                                                    </button>
+                                                                                    <input
+                                                                                        value={h.title}
+                                                                                        onChange={(e) => {
+                                                                                            const arr = [...form.guidelinesHighlights];
+                                                                                            arr[i] = { ...arr[i], title: e.target.value };
+                                                                                            update("guidelinesHighlights", arr);
+                                                                                        }}
+                                                                                        className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground font-medium"
+                                                                                        placeholder="Nome interno do destaque"
+                                                                                    />
+                                                                                </div>
 
-                                                        <AnimatePresence>
-                                                            {!isCollapsed && (
-                                                                <motion.div
-                                                                    initial={{ height: 0, opacity: 0 }}
-                                                                    animate={{ height: "auto", opacity: 1 }}
-                                                                    exit={{ height: 0, opacity: 0 }}
-                                                                    className="overflow-hidden"
-                                                                >
-                                                                    <RichTextEditor value={h} onChange={(val) => { const arr = [...form.guidelinesHighlights]; arr[i] = val; update("guidelinesHighlights", arr); }} placeholder="Destaque com suporte a negrito e cores..." />
-                                                                </motion.div>
-                                                            )}
-                                                        </AnimatePresence>
+                                                                                <AnimatePresence>
+                                                                                    {!isCollapsed && (
+                                                                                        <motion.div
+                                                                                            initial={{ height: 0, opacity: 0 }}
+                                                                                            animate={{ height: "auto", opacity: 1 }}
+                                                                                            exit={{ height: 0, opacity: 0 }}
+                                                                                            className="overflow-hidden pt-2"
+                                                                                        >
+                                                                                            <RichTextEditor value={h.content} onChange={(val) => { const arr = [...form.guidelinesHighlights]; arr[i] = { ...arr[i], content: val }; update("guidelinesHighlights", arr); }} placeholder="Destaque numérico com suporte a negrito e cores..." />
+                                                                                        </motion.div>
+                                                                                    )}
+                                                                                </AnimatePresence>
+                                                                            </div>
+                                                                            <button onClick={() => removeHighlight(i)} className="p-2 text-muted-foreground hover:text-destructive self-start pt-1 shrink-0">
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </div>
+                                                                    )}
+                                                                </Draggable>
+                                                            )
+                                                        })}
+                                                        {provided.placeholder}
                                                     </div>
-                                                    <button onClick={() => removeHighlight(i)} className="p-2 text-muted-foreground hover:text-destructive self-start pt-1">
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            )
-                                        })}
+                                                )}
+                                            </Droppable>
+                                        </DragDropContext>
                                     </div>
                                 );
                             case "support":

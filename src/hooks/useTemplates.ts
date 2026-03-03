@@ -13,7 +13,7 @@ export interface TemplateContent {
     steps?: Array<{ title: string; description: string }>;
     guidelines?: {
         content: string;
-        highlights: string[];
+        highlights: Array<string | { title: string; content: string }>;
     };
     faqs?: Array<{ question: string; answer: string }>;
     links?: Array<{

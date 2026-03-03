@@ -5,7 +5,7 @@ interface GuidelinesBlockProps {
   title?: string;
   icon?: string;
   content: string;
-  highlights?: string[];
+  highlights?: Array<string | { title: string; content: string }>;
 }
 
 const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, content, highlights }: GuidelinesBlockProps) => {
@@ -31,12 +31,15 @@ const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, conte
             <div className="mt-4 space-y-2">
               <h4 className="font-semibold text-foreground mb-4">DESTAQUE</h4>
               <ul className="space-y-3">
-                {highlights.map((highlight, index) => (
-                  <li key={index} className="flex gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-gold flex-shrink-0" />
-                    <div className="text-foreground/80 text-sm quill-content leading-tight" dangerouslySetInnerHTML={{ __html: highlight }} />
-                  </li>
-                ))}
+                {highlights.map((highlight, index) => {
+                  const contentHtml = typeof highlight === "string" ? highlight : highlight.content;
+                  return (
+                    <li key={index} className="flex gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-gold flex-shrink-0" />
+                      <div className="text-foreground/80 text-sm quill-content leading-tight" dangerouslySetInnerHTML={{ __html: contentHtml }} />
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
