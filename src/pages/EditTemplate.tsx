@@ -248,6 +248,30 @@ const EditTemplate = () => {
     const updateStep = (i: number, field: string, value: string) =>
         update("steps", form.steps.map((s, idx) => (idx === i ? { ...s, [field]: value } : s)));
 
+    const handleDragStep = (result: DropResult) => {
+        if (!result.destination) return;
+        const sourceIndex = result.source.index;
+        const destinationIndex = result.destination.index;
+        if (sourceIndex === destinationIndex) return;
+
+        const newSteps = Array.from(form.steps);
+        const [reordered] = newSteps.splice(sourceIndex, 1);
+        newSteps.splice(destinationIndex, 0, reordered);
+
+        // Adjust collapsed states
+        const newCollapsed: Record<number, boolean> = {};
+        newSteps.forEach((_, index) => {
+            let oldIndex = index;
+            if (index === destinationIndex) oldIndex = sourceIndex;
+            else if (sourceIndex < destinationIndex && index >= sourceIndex && index < destinationIndex) oldIndex = index + 1;
+            else if (sourceIndex > destinationIndex && index > destinationIndex && index <= sourceIndex) oldIndex = index - 1;
+            newCollapsed[index] = form.collapsedSteps[oldIndex] || false;
+        });
+
+        update("collapsedSteps", newCollapsed);
+        update("steps", newSteps);
+    };
+
     const addHighlight = () => update("guidelinesHighlights", [...form.guidelinesHighlights, { title: `Destaque ${form.guidelinesHighlights.length + 1}`, content: "" }]);
     const removeHighlight = (i: number) => update("guidelinesHighlights", form.guidelinesHighlights.filter((_, idx) => idx !== i));
 
@@ -404,47 +428,67 @@ const EditTemplate = () => {
                                         <div>
                                             <input value={form.stepsTitle} onChange={(e) => update("stepsTitle", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground font-semibold" placeholder="Título da Seção (ex: 📋 PRÓXIMOS PASSOS)" />
                                         </div>
-                                        {form.steps.map((step, i) => {
-                                            const isCollapsed = form.collapsedSteps[i];
-                                            return (
-                                                <div key={i} className="flex gap-2">
-                                                    <div className="flex-1 space-y-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => toggleStepCollapse(i)}
-                                                                className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground shrink-0 border border-border bg-background focus:outline-none"
-                                                            >
-                                                                {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                                            </button>
-                                                            <input value={step.title} onChange={(e) => updateStep(i, "title", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Título" />
-                                                        </div>
+                                        <DragDropContext onDragEnd={handleDragStep}>
+                                            <Droppable droppableId="steps-list">
+                                                {(provided) => (
+                                                    <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3 mt-4">
+                                                        {form.steps.map((step, i) => {
+                                                            const isCollapsed = form.collapsedSteps[i];
+                                                            return (
+                                                                <Draggable key={`step-${i}`} draggableId={`step-${i}`} index={i}>
+                                                                    {(provided, snapshot) => (
+                                                                        <div
+                                                                            ref={provided.innerRef}
+                                                                            {...provided.draggableProps}
+                                                                            className={`flex gap-2 p-3 rounded-lg border transition-colors ${snapshot.isDragging ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10" : "bg-card border-border"}`}
+                                                                        >
+                                                                            <div className="flex-1 space-y-2">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-gold p-1 -ml-1">
+                                                                                        <GripVertical className="w-4 h-4" />
+                                                                                    </div>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => toggleStepCollapse(i)}
+                                                                                        className="p-1.5 hover:bg-secondary rounded-lg transition-colors text-muted-foreground shrink-0 border border-border bg-background focus:outline-none"
+                                                                                    >
+                                                                                        {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                                                    </button>
+                                                                                    <input value={step.title} onChange={(e) => updateStep(i, "title", e.target.value)} className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground font-medium" placeholder="Título" />
+                                                                                </div>
 
-                                                        <AnimatePresence>
-                                                            {!isCollapsed && (
-                                                                <motion.div
-                                                                    initial={{ height: 0, opacity: 0 }}
-                                                                    animate={{ height: "auto", opacity: 1 }}
-                                                                    exit={{ height: 0, opacity: 0 }}
-                                                                    className="overflow-hidden"
-                                                                >
-                                                                    <RichTextEditor value={step.description} onChange={(val) => updateStep(i, "description", val)} placeholder="Descrição com formatação (suporta tópicos, negrito)..." />
-                                                                </motion.div>
-                                                            )}
-                                                        </AnimatePresence>
+                                                                                <AnimatePresence>
+                                                                                    {!isCollapsed && (
+                                                                                        <motion.div
+                                                                                            initial={{ height: 0, opacity: 0 }}
+                                                                                            animate={{ height: "auto", opacity: 1 }}
+                                                                                            exit={{ height: 0, opacity: 0 }}
+                                                                                            className="overflow-hidden pt-2"
+                                                                                        >
+                                                                                            <RichTextEditor value={step.description} onChange={(val) => updateStep(i, "description", val)} placeholder="Descrição com formatação (suporta tópicos, negrito)..." />
+                                                                                        </motion.div>
+                                                                                    )}
+                                                                                </AnimatePresence>
+                                                                            </div>
+                                                                            <div className="flex flex-col gap-1 shrink-0 pt-1">
+                                                                                <button onClick={() => duplicateStep(i)} className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="Duplicar">
+                                                                                    <Copy className="w-4 h-4" />
+                                                                                </button>
+                                                                                <button onClick={() => removeStep(i)} className="p-2 text-muted-foreground hover:text-destructive transition-colors" title="Excluir">
+                                                                                    <Trash2 className="w-4 h-4" />
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </Draggable>
+                                                            )
+                                                        })}
+                                                        {provided.placeholder}
                                                     </div>
-                                                    <div className="flex flex-col gap-1">
-                                                        <button onClick={() => duplicateStep(i)} className="p-2 text-muted-foreground hover:text-foreground transition-colors self-start pb-0" title="Duplicar">
-                                                            <Copy className="w-4 h-4" />
-                                                        </button>
-                                                        <button onClick={() => removeStep(i)} className="p-2 text-muted-foreground hover:text-destructive transition-colors self-start pt-1" title="Excluir">
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )
-                                        })}
-                                        {form.steps.length === 0 && <p className="text-xs text-muted-foreground">Nenhum passo adicionado.</p>}
+                                                )}
+                                            </Droppable>
+                                        </DragDropContext>
+                                        {form.steps.length === 0 && <p className="text-xs text-muted-foreground mt-4">Nenhum passo adicionado.</p>}
                                     </div>
                                 );
                             case "optionalBlocks":
