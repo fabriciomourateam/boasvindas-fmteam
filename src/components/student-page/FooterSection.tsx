@@ -9,18 +9,13 @@ const FooterSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <div className="mb-4">
-            <span className="font-display text-3xl gradient-gold-text">FM</span>
-            <span className="font-display text-xl text-white ml-1">NUTRIÇÃO E TREINAMENTO</span>
+          <div className="mb-6 flex justify-center">
+            <img src="/logo-footer.png" alt="FM Nutrição e Treinamento" className="h-8 md:h-10 w-auto object-contain" />
           </div>
 
-          <p className="text-white/40 text-xs mb-6">
+          <p className="text-white/80 text-xs mb-6">
             Seu sucesso depende de mim e o meu sucesso depende de você.
           </p>
-
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full gradient-gold">
-            <span className="font-display text-lg text-primary-foreground tracking-wide">BORA PRA CIMA 🎯</span>
-          </div>
 
           <p className="text-white/30 text-xs mt-8">
             © {new Date().getFullYear()} Fabricio Moura • Nutrição e Treinamento

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, X, GripVertical, Copy } from "lucide-react";
+import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, X, GripVertical, Copy, ChevronDown, ChevronRight } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useRequireAuth } from "@/hooks/useAuth";
 import {
@@ -14,6 +15,7 @@ import type { Json } from "@/integrations/supabase/types";
 import RichTextEditor from "@/components/RichTextEditor";
 import ImageUpload from "@/components/ImageUpload";
 import SortableSections, { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
+import SortableCustomBlocks from "@/components/SortableCustomBlocks";
 import LivePreviewModal from "@/components/LivePreviewModal";
 
 const objectives = [
@@ -99,6 +101,14 @@ const EditTemplate = () => {
     const { user } = useRequireAuth();
 
     const [form, setForm] = useState<TemplateForm>({ ...defaultForm });
+
+    const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(false);
+    const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(false);
+    const [collapsedSteps, setCollapsedSteps] = useState<Record<number, boolean>>({});
+
+    const toggleStepCollapse = (i: number) => {
+        setCollapsedSteps((prev) => ({ ...prev, [i]: !prev[i] }));
+    };
 
     const { data: existingTemplate } = useTemplate(id || duplicateId || "");
     const createMutation = useCreateTemplate();
@@ -270,10 +280,35 @@ const EditTemplate = () => {
                     </h1>
 
                     {/* Ordenação */}
-                    <div className="p-5 rounded-lg bg-card border border-border space-y-4">
-                        <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🔄 Ordenação das Seções</h2>
-                        <p className="text-xs text-muted-foreground">Arraste para reordenar como as seções aparecerão na página do aluno.</p>
-                        <SortableSections items={form.sectionOrder} onChange={(newOrder) => update("sectionOrder", newOrder)} />
+                    <div className="p-5 rounded-lg bg-card border border-border">
+                        <div
+                            className="flex items-center justify-between cursor-pointer -m-5 p-5"
+                            onClick={() => setIsSectionOrderCollapsed(!isSectionOrderCollapsed)}
+                        >
+                            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider flex items-center gap-2">
+                                🔄 Ordenação das Seções
+                            </h2>
+                            <button
+                                type="button"
+                                className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
+                            >
+                                {!isSectionOrderCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                            </button>
+                        </div>
+
+                        <AnimatePresence>
+                            {!isSectionOrderCollapsed && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="space-y-4 overflow-hidden pt-4 mt-1"
+                                >
+                                    <p className="text-xs text-muted-foreground">Arraste para reordenar como as seções aparecerão na página do aluno.</p>
+                                    <SortableSections items={form.sectionOrder} onChange={(newOrder) => update("sectionOrder", newOrder)} />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     {/* Basic info */}
@@ -326,94 +361,101 @@ const EditTemplate = () => {
                                         <div>
                                             <input value={form.stepsTitle} onChange={(e) => update("stepsTitle", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground font-semibold" placeholder="Título da Seção (ex: 📋 PRÓXIMOS PASSOS)" />
                                         </div>
-                                        {form.steps.map((step, i) => (
-                                            <div key={i} className="flex gap-2">
-                                                <div className="flex-1 space-y-2">
-                                                    <input value={step.title} onChange={(e) => updateStep(i, "title", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Título" />
-                                                    <RichTextEditor value={step.description} onChange={(val) => updateStep(i, "description", val)} placeholder="Descrição com formatação (suporta tópicos, negrito)..." />
+                                        {form.steps.map((step, i) => {
+                                            const isCollapsed = collapsedSteps[i];
+                                            return (
+                                                <div key={i} className="flex gap-2">
+                                                    <div className="flex-1 space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => toggleStepCollapse(i)}
+                                                                className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground shrink-0 border border-border bg-background focus:outline-none"
+                                                            >
+                                                                {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                            </button>
+                                                            <input value={step.title} onChange={(e) => updateStep(i, "title", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Título" />
+                                                        </div>
+
+                                                        <AnimatePresence>
+                                                            {!isCollapsed && (
+                                                                <motion.div
+                                                                    initial={{ height: 0, opacity: 0 }}
+                                                                    animate={{ height: "auto", opacity: 1 }}
+                                                                    exit={{ height: 0, opacity: 0 }}
+                                                                    className="overflow-hidden"
+                                                                >
+                                                                    <RichTextEditor value={step.description} onChange={(val) => updateStep(i, "description", val)} placeholder="Descrição com formatação (suporta tópicos, negrito)..." />
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                    <div className="flex flex-col gap-1">
+                                                        <button onClick={() => duplicateStep(i)} className="p-2 text-muted-foreground hover:text-foreground transition-colors self-start pb-0" title="Duplicar">
+                                                            <Copy className="w-4 h-4" />
+                                                        </button>
+                                                        <button onClick={() => removeStep(i)} className="p-2 text-muted-foreground hover:text-destructive transition-colors self-start pt-1" title="Excluir">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="flex flex-col gap-1">
-                                                    <button onClick={() => duplicateStep(i)} className="p-2 text-muted-foreground hover:text-foreground transition-colors self-start pb-0" title="Duplicar">
-                                                        <Copy className="w-4 h-4" />
-                                                    </button>
-                                                    <button onClick={() => removeStep(i)} className="p-2 text-muted-foreground hover:text-destructive transition-colors self-start pt-1" title="Excluir">
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            )
+                                        })}
                                         {form.steps.length === 0 && <p className="text-xs text-muted-foreground">Nenhum passo adicionado.</p>}
                                     </div>
                                 );
                             case "optionalBlocks":
                                 return (
-                                    <div key="optionalBlocks" className="space-y-6">
-                                        <div className="p-5 rounded-lg bg-card border border-border space-y-3">
-                                            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">Blocos Opcionais Padrão</h2>
-                                            {[
-                                                { key: "hasTreino", label: "Treino" },
-                                                { key: "hasPsicologa", label: "Psicóloga" },
-                                                { key: "hasBioimpedancia", label: "Bioimpedância" },
-                                                { key: "hasAreaMembros", label: "Área de Membros" },
-                                                { key: "hasApps", label: "Apps (WebDiet / MFit)" },
-                                            ].map(({ key, label }) => (
-                                                <label key={key} className="flex items-center justify-between p-3 rounded-md bg-secondary cursor-pointer">
-                                                    <span className="text-sm text-foreground">{label}</span>
-                                                    <input type="checkbox" checked={(form as any)[key]} onChange={(e) => update(key as any, e.target.checked)} className="w-5 h-5 rounded accent-gold" />
-                                                </label>
-                                            ))}
+                                    <div key="optionalBlocks" className="p-5 rounded-lg bg-card border border-border">
+                                        <div
+                                            className="flex items-center justify-between cursor-pointer -m-5 p-5"
+                                            onClick={() => setIsOptionalBlocksCollapsed(!isOptionalBlocksCollapsed)}
+                                        >
+                                            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">
+                                                Blocos Opcionais Padrão
+                                            </h2>
+                                            <button
+                                                type="button"
+                                                className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
+                                            >
+                                                {!isOptionalBlocksCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                            </button>
                                         </div>
 
-                                        <div className="p-5 rounded-lg bg-card border border-border space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🧩 Blocos Customizados</h2>
-                                                <button onClick={addOptionalBlock} className="flex items-center gap-1 text-xs text-gold hover:text-gold-dark transition-colors">
-                                                    <Plus className="w-3 h-3" /> Adicionar
-                                                </button>
-                                            </div>
-                                            {form.optionalBlocks.map((block, i) => (
-                                                <div key={i} className="p-4 rounded-lg bg-secondary space-y-2">
-                                                    <div className="flex gap-2">
-                                                        <select value={block.type} onChange={(e) => updateOptionalBlock(i, "type", e.target.value)} className="px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground">
-                                                            <option value="treino">Treino</option>
-                                                            <option value="psicologa">Psicóloga</option>
-                                                            <option value="bioimpedancia">Bioimpedância</option>
-                                                            <option value="area_membros">Área de Membros</option>
-                                                            <option value="apps">Apps</option>
-                                                            <option value="extras">Extras</option>
-                                                        </select>
-                                                        <input value={block.title} onChange={(e) => updateOptionalBlock(i, "title", e.target.value)} className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Título" />
-                                                        <div className="flex gap-1">
-                                                            <button onClick={() => duplicateOptionalBlock(i)} className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="Duplicar">
-                                                                <Copy className="w-4 h-4" />
-                                                            </button>
-                                                            <button onClick={() => removeOptionalBlock(i)} className="p-2 text-muted-foreground hover:text-destructive transition-colors" title="Excluir">
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
+                                        <AnimatePresence>
+                                            {!isOptionalBlocksCollapsed && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: "auto", opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="space-y-6 overflow-hidden mt-4 pt-4 border-t border-border"
+                                                >
+                                                    <div className="space-y-3">
+                                                        <h3 className="text-xs text-muted-foreground font-medium mb-2">Blocos Padrões (Apps e Credenciais)</h3>
+                                                        {[
+                                                            { key: "hasTreino", label: "Treino" },
+                                                            { key: "hasPsicologa", label: "Psicóloga" },
+                                                            { key: "hasBioimpedancia", label: "Bioimpedância" },
+                                                            { key: "hasAreaMembros", label: "Área de Membros" },
+                                                            { key: "hasApps", label: "Apps (WebDiet / MFit)" },
+                                                        ].map(({ key, label }) => (
+                                                            <label key={key} className="flex items-center justify-between p-3 rounded-md bg-secondary cursor-pointer">
+                                                                <span className="text-sm text-foreground">{label}</span>
+                                                                <input type="checkbox" checked={(form as any)[key]} onChange={(e) => update(key as any, e.target.checked)} className="w-5 h-5 rounded accent-gold" />
+                                                            </label>
+                                                        ))}
                                                     </div>
 
-                                                    {block.imageUrl && (
-                                                        <div className="relative w-full h-32 rounded-lg overflow-hidden border border-border mb-2">
-                                                            <img src={block.imageUrl} alt="Capa do bloco" className="w-full h-full object-cover" />
-                                                            <button onClick={() => updateOptionalBlock(i, "imageUrl", "")} className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors">
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    )}
-
-                                                    <RichTextEditor value={block.content} onChange={(val) => updateOptionalBlock(i, "content", val)} placeholder="Conteúdo do bloco..." />
-                                                    <div className="grid grid-cols-2 gap-2 mt-2">
-                                                        <input value={block.link || ""} onChange={(e) => updateOptionalBlock(i, "link", e.target.value)} className="px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Link (opcional)" />
-                                                        <input value={block.linkLabel || ""} onChange={(e) => updateOptionalBlock(i, "linkLabel", e.target.value)} className="px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Texto do link" />
+                                                    <div className="pt-2">
+                                                        <h3 className="text-xs text-muted-foreground font-medium mb-4">Blocos 100% Customizados</h3>
+                                                        <SortableCustomBlocks
+                                                            blocks={form.optionalBlocks as any}
+                                                            onChange={(blocks) => update("optionalBlocks", blocks)}
+                                                        />
                                                     </div>
-                                                    <div className="mt-2">
-                                                        <ImageUpload onUpload={(url) => updateOptionalBlock(i, "imageUrl", url)} label={block.imageUrl ? "Trocar Imagem" : "Adicionar Imagem de Capa"} />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {form.optionalBlocks.length === 0 && <p className="text-xs text-muted-foreground">Nenhum bloco customizado.</p>}
-                                        </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 );
                             case "links":

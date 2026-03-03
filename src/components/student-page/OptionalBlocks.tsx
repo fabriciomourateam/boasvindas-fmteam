@@ -7,6 +7,8 @@ interface OptionalBlock {
   content: string;
   link?: string;
   linkLabel?: string;
+  link2?: string;
+  linkLabel2?: string;
   imageUrl?: string;
 }
 
@@ -52,21 +54,36 @@ const OptionalBlocks = ({ blocks }: OptionalBlocksProps) => {
               <h4 className="font-display text-xl text-white">{block.title}</h4>
             </div>
             {block.imageUrl && (
-              <div className="w-full h-48 sm:h-64 overflow-hidden border-b border-border">
-                <img src={block.imageUrl} alt={block.title} className="w-full h-full object-cover" />
+              <div className="w-full relative border-b border-border bg-black/5">
+                <img src={block.imageUrl} alt={block.title} className="w-full object-contain max-h-[500px]" />
               </div>
             )}
             <div className="p-5">
               <div className="text-foreground/80 text-sm leading-relaxed quill-content" dangerouslySetInnerHTML={{ __html: block.content }} />
-              {block.link && (
-                <a
-                  href={block.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg gradient-gold text-primary-foreground font-semibold text-sm hover:shadow-gold transition-all"
-                >
-                  {block.linkLabel || "Acessar"} →
-                </a>
+
+              {(block.link || block.link2) && (
+                <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                  {block.link && (
+                    <a
+                      href={block.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg gradient-gold text-primary-foreground font-semibold text-sm hover:shadow-gold transition-all text-center"
+                    >
+                      {block.linkLabel || "Acessar"} →
+                    </a>
+                  )}
+                  {block.link2 && (
+                    <a
+                      href={block.link2}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-foreground font-semibold text-sm hover:bg-secondary/80 outline outline-1 outline-border transition-all text-center"
+                    >
+                      {block.linkLabel2 || "Acessar"} →
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           </motion.div>

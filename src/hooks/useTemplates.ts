@@ -36,7 +36,6 @@ export interface TemplateContent {
     hideStepsTitle?: boolean;
 }
 
-/** Shape of the blocks JSONB column */
 export interface TemplateBlocks {
     hasTreino?: boolean;
     hasPsicologa?: boolean;
@@ -49,6 +48,9 @@ export interface TemplateBlocks {
         content: string;
         link?: string;
         linkLabel?: string;
+        link2?: string;
+        linkLabel2?: string;
+        imageUrl?: string;
     }>;
     customBlocks?: Array<{
         type: string;
@@ -56,6 +58,9 @@ export interface TemplateBlocks {
         content: string;
         link?: string;
         linkLabel?: string;
+        link2?: string;
+        linkLabel2?: string;
+        imageUrl?: string;
     }>;
 }
 
