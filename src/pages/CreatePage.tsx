@@ -15,6 +15,7 @@ import ImageUpload from "@/components/ImageUpload";
 import SortableSections, { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
 import SortableCustomBlocks from "@/components/SortableCustomBlocks";
 import LivePreviewModal from "@/components/LivePreviewModal";
+import { TagInput } from "@/components/TagInput";
 
 const objectives = [
   { value: "emagrecimento", label: "Emagrecimento" },
@@ -71,6 +72,7 @@ interface FormState {
     icon?: string;
     description?: string;
   }>;
+  tags: string[];
   sectionOrder: string[];
   collapsedSteps: Record<number, boolean>;
   collapsedHighlights: Record<number, boolean>;
@@ -106,6 +108,7 @@ const defaultForm: FormState = {
   faqs: [],
   optionalBlocks: [],
   links: [],
+  tags: [],
   sectionOrder: DEFAULT_SECTION_ORDER,
   collapsedSteps: {},
   collapsedHighlights: {},
@@ -137,6 +140,10 @@ const CreatePage = () => {
   const { data: templates = [] } = useTemplates();
   const { data: pages = [] } = useStudentPages();
   const uniqueFolders = Array.from(new Set(pages.map((p) => (p.custom_content as any)?.folder).filter(Boolean))) as string[];
+
+  // Deriva todas as tags usadas por todos os alunos
+  const allAvailableTags = Array.from(new Set(pages.flatMap(p => (p.custom_content as any)?.tags || []))).sort() as string[];
+
   const { data: existingPage } = useStudentPageById(id || "");
   const createMutation = useCreateStudentPage();
   const updateMutation = useUpdateStudentPage();
@@ -177,6 +184,7 @@ const CreatePage = () => {
         faqs: cc.faqs || [],
         optionalBlocks: cc.optionalBlocks || [],
         links: cc.links || [],
+        tags: cc.tags || [],
         sectionOrder: cc.sectionOrder || DEFAULT_SECTION_ORDER,
         collapsedSteps: cc.collapsedSteps || {},
         collapsedHighlights: cc.collapsedHighlights || {},
@@ -215,6 +223,7 @@ const CreatePage = () => {
         : prev.guidelinesHighlights,
       faqs: content.faqs || prev.faqs,
       links: content.links || prev.links,
+      tags: content.tags || prev.tags,
       webdietLogin: content.credentials?.webdietLogin || prev.webdietLogin,
       webdietPassword: content.credentials?.webdietPassword || prev.webdietPassword,
       mfitLogin: content.credentials?.mfitLogin || prev.mfitLogin,
@@ -252,6 +261,7 @@ const CreatePage = () => {
       faqs: form.faqs,
       optionalBlocks: form.optionalBlocks,
       links: form.links,
+      tags: form.tags,
       sectionOrder: form.sectionOrder,
       collapsedSteps: form.collapsedSteps,
       collapsedHighlights: form.collapsedHighlights,
@@ -586,6 +596,18 @@ const CreatePage = () => {
                 </datalist>
               </div>
             </div>
+
+            {/* Tags section */}
+            <div>
+              <label className="text-xs text-muted-foreground font-medium mb-1 block">Tags do Aluno</label>
+              <TagInput
+                value={form.tags}
+                onChange={(tags) => update("tags", tags)}
+                availableTags={allAvailableTags}
+                placeholder="Selecione ou adicione tags (ex: Prioridade, Risco de Evasão)"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs text-muted-foreground font-medium">Duração</label>
