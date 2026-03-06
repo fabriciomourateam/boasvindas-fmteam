@@ -23,7 +23,7 @@ const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, conte
           </h3>
 
           <div
-            className="text-foreground/80 text-sm leading-relaxed quill-content"
+            className="text-foreground text-sm leading-relaxed quill-content"
             dangerouslySetInnerHTML={{ __html: content }}
           />
 

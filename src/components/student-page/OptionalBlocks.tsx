@@ -61,7 +61,7 @@ const OptionalBlocks = ({ blocks }: OptionalBlocksProps) => {
                 </div>
               )}
               <div className="p-5">
-                <div className="text-foreground/80 text-sm leading-relaxed quill-content" dangerouslySetInnerHTML={{ __html: block.content }} />
+                <div className="text-foreground text-sm leading-relaxed quill-content" dangerouslySetInnerHTML={{ __html: block.content }} />
 
                 {(block.link || block.link2) && (
                   <div className="mt-6 flex flex-col sm:flex-row gap-4">
