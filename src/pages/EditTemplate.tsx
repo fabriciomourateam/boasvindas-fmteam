@@ -378,7 +378,17 @@ const EditTemplate = () => {
                                     className="space-y-4 overflow-hidden pt-4 mt-1"
                                 >
                                     <p className="text-xs text-muted-foreground">Este texto é apenas para organização interna e não aparecerá para o aluno.</p>
-                                    <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} rows={4} className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground resize-none" placeholder="Texto de envio padrão..." />
+                                    <textarea
+                                        value={form.notes}
+                                        onChange={(e) => {
+                                            update("notes", e.target.value);
+                                            e.target.style.height = 'auto';
+                                            e.target.style.height = e.target.scrollHeight + 'px';
+                                        }}
+                                        className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground resize-y overflow-hidden"
+                                        placeholder="Texto de envio padrão..."
+                                        style={{ minHeight: '150px' }}
+                                    />
                                 </motion.div>
                             )}
                         </AnimatePresence>
