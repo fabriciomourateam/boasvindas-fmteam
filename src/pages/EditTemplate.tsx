@@ -111,9 +111,10 @@ const EditTemplate = () => {
 
     const [form, setForm] = useState<TemplateForm>({ ...defaultForm });
 
-    const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(false);
+    const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(true);
     const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(false);
     const [isStandardBlocksCollapsed, setIsStandardBlocksCollapsed] = useState(true);
+    const [isNotesCollapsed, setIsNotesCollapsed] = useState(true);
     const toggleStepCollapse = (i: number) => {
         const novoEstado = { ...form.collapsedSteps, [i]: !form.collapsedSteps[i] };
         update("collapsedSteps", novoEstado);
@@ -351,33 +352,33 @@ const EditTemplate = () => {
                         {isEditing ? "EDITAR TEMPLATE" : duplicateId ? "DUPLICAR TEMPLATE" : "NOVO TEMPLATE"}
                     </h1>
 
-                    {/* Ordenação */}
+                    {/* Texto de Envio (Notes) */}
                     <div className="p-5 rounded-lg bg-card border border-border">
                         <div
                             className="flex items-center justify-between cursor-pointer -m-5 p-5"
-                            onClick={() => setIsSectionOrderCollapsed(!isSectionOrderCollapsed)}
+                            onClick={() => setIsNotesCollapsed(!isNotesCollapsed)}
                         >
                             <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider flex items-center gap-2">
-                                🔄 Ordenação das Seções
+                                📝 Texto de envio
                             </h2>
                             <button
                                 type="button"
                                 className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
                             >
-                                {!isSectionOrderCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                {!isNotesCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                             </button>
                         </div>
 
                         <AnimatePresence>
-                            {!isSectionOrderCollapsed && (
+                            {!isNotesCollapsed && (
                                 <motion.div
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: "auto", opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
                                     className="space-y-4 overflow-hidden pt-4 mt-1"
                                 >
-                                    <p className="text-xs text-muted-foreground">Arraste para reordenar como as seções aparecerão na página do aluno.</p>
-                                    <SortableSections items={form.sectionOrder} onChange={(newOrder) => update("sectionOrder", newOrder)} />
+                                    <p className="text-xs text-muted-foreground">Este texto é apenas para organização interna e não aparecerá para o aluno.</p>
+                                    <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} rows={4} className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground resize-none" placeholder="Texto de envio padrão..." />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -742,10 +743,36 @@ const EditTemplate = () => {
                     })}
 
 
-                    {/* Notes */}
-                    <div className="p-5 rounded-lg bg-card border border-border space-y-4">
-                        <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">📝 Observações Padrão</h2>
-                        <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} rows={3} className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground resize-none" placeholder="Notas adicionais do template..." />
+                    {/* Ordenação */}
+                    <div className="p-5 rounded-lg bg-card border border-border">
+                        <div
+                            className="flex items-center justify-between cursor-pointer -m-5 p-5"
+                            onClick={() => setIsSectionOrderCollapsed(!isSectionOrderCollapsed)}
+                        >
+                            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider flex items-center gap-2">
+                                🔄 Ordenação das Seções
+                            </h2>
+                            <button
+                                type="button"
+                                className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
+                            >
+                                {!isSectionOrderCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                            </button>
+                        </div>
+
+                        <AnimatePresence>
+                            {!isSectionOrderCollapsed && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="space-y-4 overflow-hidden pt-4 mt-1"
+                                >
+                                    <p className="text-xs text-muted-foreground">Arraste para reordenar como as seções aparecerão na página do aluno.</p>
+                                    <SortableSections items={form.sectionOrder} onChange={(newOrder) => update("sectionOrder", newOrder)} />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </motion.div>
             </main>
