@@ -12,6 +12,8 @@ export interface TemplateContent {
     duration?: string;
     steps?: Array<{ title: string; description: string }>;
     guidelines?: {
+        title?: string;
+        hideHighlightsTitle?: boolean;
         content: string;
         highlights: Array<string | { title: string; content: string }>;
     };

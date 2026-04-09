@@ -132,6 +132,8 @@ const StudentPage = () => {
         return (guidelines.content || (guidelines.highlights && guidelines.highlights.length > 0)) ? (
           <GuidelinesBlock
             key="guidelines"
+            title={guidelines.title}
+            hideHighlightsTitle={guidelines.hideHighlightsTitle}
             content={guidelines.content || ""}
             highlights={guidelines.highlights || []}
           />

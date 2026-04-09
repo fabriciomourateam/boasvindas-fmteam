@@ -52,6 +52,8 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
         hideStepsTitle = false,
         guidelinesContent,
         guidelinesHighlights = [],
+        guidelinesTitle = "📌 Orientações Importantes",
+        hideHighlightsTitle = false,
         faqs = [],
         optionalBlocks = [],
         links = [],
@@ -125,6 +127,8 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
                 return (guidelinesContent || (guidelinesHighlights && guidelinesHighlights.length > 0)) ? (
                     <GuidelinesBlock
                         key="guidelines"
+                        title={guidelinesTitle}
+                        hideHighlightsTitle={hideHighlightsTitle}
                         content={guidelinesContent || ""}
                         highlights={guidelinesHighlights || []}
                     />

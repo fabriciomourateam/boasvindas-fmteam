@@ -6,9 +6,10 @@ interface GuidelinesBlockProps {
   icon?: string;
   content: string;
   highlights?: Array<string | { title: string; content: string }>;
+  hideHighlightsTitle?: boolean;
 }
 
-const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, content, highlights }: GuidelinesBlockProps) => {
+const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, content, highlights, hideHighlightsTitle }: GuidelinesBlockProps) => {
   return (
     <section className="px-4 sm:px-8 py-8 bg-background">
       <div className="max-w-lg mx-auto">
@@ -29,7 +30,7 @@ const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, conte
 
           {highlights && highlights.length > 0 && (
             <div className="mt-4 space-y-2">
-              <h4 className="font-semibold text-foreground mb-4">DESTAQUE</h4>
+              {!hideHighlightsTitle && <h4 className="font-semibold text-foreground mb-4">DESTAQUE</h4>}
               <ul className="space-y-3">
                 {highlights.map((highlight, index) => {
                   const contentHtml = typeof highlight === "string" ? highlight : highlight.content;
