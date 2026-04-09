@@ -46,6 +46,8 @@ interface TemplateForm {
     steps: Array<{ title: string; description: string }>;
     stepsTitle: string;
     hideStepsTitle: boolean;
+    guidelinesTitle: string;
+    hideHighlightsTitle: boolean;
     guidelinesContent: string;
     guidelinesHighlights: Array<{ title: string; content: string }>;
     faqs: Array<{ question: string; answer: string }>;
@@ -90,6 +92,8 @@ const defaultForm: TemplateForm = {
     steps: [],
     stepsTitle: "📋 PRÓXIMOS PASSOS",
     hideStepsTitle: false,
+    guidelinesTitle: "📌 Orientações Importantes",
+    hideHighlightsTitle: false,
     guidelinesContent: "",
     guidelinesHighlights: [],
     faqs: [],
@@ -155,6 +159,8 @@ const EditTemplate = () => {
                 steps: content.steps || [],
                 stepsTitle: content.stepsTitle || "📋 PRÓXIMOS PASSOS",
                 hideStepsTitle: content.hideStepsTitle ?? false,
+                guidelinesTitle: content.guidelines?.title || "📌 Orientações Importantes",
+                hideHighlightsTitle: content.guidelines?.hideHighlightsTitle ?? false,
                 guidelinesContent: content.guidelines?.content || "",
                 guidelinesHighlights: (content.guidelines?.highlights || []).map((h: any) =>
                     typeof h === "string" ? { title: "Destaque", content: h } : h
@@ -186,6 +192,8 @@ const EditTemplate = () => {
             stepsTitle: form.stepsTitle,
             hideStepsTitle: form.hideStepsTitle,
             guidelines: {
+                title: form.guidelinesTitle,
+                hideHighlightsTitle: form.hideHighlightsTitle,
                 content: form.guidelinesContent,
                 highlights: form.guidelinesHighlights,
             },
@@ -650,10 +658,21 @@ const EditTemplate = () => {
                             case "guidelines":
                                 return (
                                     <div key="guidelines" className="p-5 rounded-lg bg-card border border-border space-y-4">
-                                        <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">📌 Orientações Base</h2>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">📌 Orientações Base</h2>
+                                        </div>
+                                        <div>
+                                            <input value={form.guidelinesTitle} onChange={(e) => update("guidelinesTitle", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground font-semibold" placeholder="Título da Seção (ex: 📌 Orientações Importantes)" />
+                                        </div>
                                         <RichTextEditor value={form.guidelinesContent} onChange={(val) => update("guidelinesContent", val)} placeholder="Orientações padrão para o aluno com suporte a formatação..." />
                                         <div className="flex items-center justify-between mt-4">
-                                            <h3 className="text-xs text-muted-foreground font-medium">Destaques</h3>
+                                            <div className="flex items-center gap-4">
+                                                <h3 className="text-xs text-muted-foreground font-medium">Destaques</h3>
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input type="checkbox" checked={form.hideHighlightsTitle} onChange={(e) => update("hideHighlightsTitle", e.target.checked)} className="w-4 h-4 accent-gold" />
+                                                    <span className="text-xs text-muted-foreground">Ocultar palavra DESTAQUE</span>
+                                                </label>
+                                            </div>
                                             <button onClick={addHighlight} className="flex items-center gap-1 text-xs text-gold hover:text-gold-dark transition-colors">
                                                 <Plus className="w-3 h-3" /> Adicionar
                                             </button>
