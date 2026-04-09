@@ -119,6 +119,7 @@ const EditTemplate = () => {
     const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(false);
     const [isStandardBlocksCollapsed, setIsStandardBlocksCollapsed] = useState(true);
     const [isNotesCollapsed, setIsNotesCollapsed] = useState(true);
+    const [isGuidelinesCollapsed, setIsGuidelinesCollapsed] = useState(false);
     const toggleStepCollapse = (i: number) => {
         const novoEstado = { ...form.collapsedSteps, [i]: !form.collapsedSteps[i] };
         update("collapsedSteps", novoEstado);
@@ -657,13 +658,33 @@ const EditTemplate = () => {
                                 ) : null;
                             case "guidelines":
                                 return (
-                                    <div key="guidelines" className="p-5 rounded-lg bg-card border border-border space-y-4">
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">📌 Orientações Base</h2>
+                                    <div key="guidelines" className="p-5 rounded-lg bg-card border border-border">
+                                        <div
+                                            className="flex items-center justify-between cursor-pointer -m-5 p-5"
+                                            onClick={() => setIsGuidelinesCollapsed(!isGuidelinesCollapsed)}
+                                        >
+                                            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">
+                                                📌 Orientações Base
+                                            </h2>
+                                            <button
+                                                type="button"
+                                                className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
+                                            >
+                                                {!isGuidelinesCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                            </button>
                                         </div>
-                                        <div>
-                                            <input value={form.guidelinesTitle} onChange={(e) => update("guidelinesTitle", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground font-semibold" placeholder="Título da Seção (ex: 📌 Orientações Importantes)" />
-                                        </div>
+
+                                        <AnimatePresence>
+                                            {!isGuidelinesCollapsed && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: "auto", opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="space-y-4 overflow-hidden pt-4 mt-6 border-t border-border"
+                                                >
+                                                    <div>
+                                                        <input value={form.guidelinesTitle} onChange={(e) => update("guidelinesTitle", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground font-semibold" placeholder="Título da Seção (ex: 📌 Orientações Importantes)" />
+                                                    </div>
                                         <RichTextEditor value={form.guidelinesContent} onChange={(val) => update("guidelinesContent", val)} placeholder="Orientações padrão para o aluno com suporte a formatação..." />
                                         <div className="flex items-center justify-between mt-4">
                                             <div className="flex items-center gap-4">
@@ -741,6 +762,9 @@ const EditTemplate = () => {
                                                 )}
                                             </Droppable>
                                         </DragDropContext>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 );
                             case "support":
