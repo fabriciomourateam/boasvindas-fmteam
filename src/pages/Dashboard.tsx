@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Eye, Edit2, Copy, Trash2, FileText, LayoutTemplate, LogOut, ArrowLeft, Folder, FolderOutput, Tag, Settings2, X } from "lucide-react";
+import { Search, Plus, Eye, Edit2, Copy, Trash2, FileText, LayoutTemplate, LogOut, ArrowLeft, Folder, FolderOutput, Tag, Settings2, X, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -522,6 +522,20 @@ const Dashboard = () => {
                                         title="Copiar link"
                                       >
                                         <Copy className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          if (page.notes) {
+                                            navigator.clipboard.writeText(page.notes);
+                                            toast.success("Texto de envio copiado!");
+                                          } else {
+                                            toast.error("Este aluno não possui um texto de envio definido.");
+                                          }
+                                        }}
+                                        className="p-2 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+                                        title="Copiar texto de envio"
+                                      >
+                                        <MessageSquare className="w-4 h-4" />
                                       </button>
                                       <button
                                         onClick={() => navigate(`/admin/editar/${page.id}`)}
