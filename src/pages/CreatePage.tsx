@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, X, LayoutTemplate, GripVertical, Copy, ChevronDown, ChevronRight } from "lucide-react";
+import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, X, LayoutTemplate, GripVertical, Copy, ChevronDown, ChevronRight, Link } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -550,12 +550,28 @@ const CreatePage = () => {
               <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider flex items-center gap-2">
                 📝 Texto de envio
               </h2>
-              <button
-                type="button"
-                className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
-              >
-                {!isNotesCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-              </button>
+              <div className="flex items-center gap-2">
+                {isEditing && existingPage?.slug && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const url = `${window.location.origin}/aluno/${existingPage.slug}`;
+                      navigator.clipboard.writeText(url);
+                      toast.success("Link do aluno copiado!");
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-background border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  >
+                    <Link className="w-3.5 h-3.5" /> Copiar Link
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
+                >
+                  {!isNotesCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <AnimatePresence>
