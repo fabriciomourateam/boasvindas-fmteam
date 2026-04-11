@@ -551,20 +551,23 @@ const CreatePage = () => {
                 📝 Texto de envio
               </h2>
               <div className="flex items-center gap-2">
-                {isEditing && existingPage?.slug && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const url = `${window.location.origin}/aluno/${existingPage.slug}`;
-                      navigator.clipboard.writeText(url);
-                      toast.success("Link do aluno copiado!");
-                    }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-background border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                  >
-                    <Link className="w-3.5 h-3.5" /> Copiar Link
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const slug = (isEditing && existingPage?.slug) ? existingPage.slug : generateSlug(form.name);
+                    if (!slug) {
+                      toast.error("Preencha o nome do aluno abaixo para gerar o link.");
+                      return;
+                    }
+                    const url = `${window.location.origin}/aluno/${slug}`;
+                    navigator.clipboard.writeText(url);
+                    toast.success("Link do aluno copiado!");
+                  }}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-background border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                >
+                  <Link className="w-3.5 h-3.5" /> Copiar Link
+                </button>
                 <button
                   type="button"
                   className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
