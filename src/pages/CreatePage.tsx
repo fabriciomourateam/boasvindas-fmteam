@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, X, LayoutTemplate, GripVertical, Copy, ChevronDown, ChevronRight, Link } from "lucide-react";
+import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, EyeOff, X, LayoutTemplate, GripVertical, Copy, ChevronDown, ChevronRight, Link } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -56,7 +56,7 @@ interface FormState {
   guidelinesTitle: string;
   hideHighlightsTitle: boolean;
   guidelinesContent: string;
-  guidelinesHighlights: Array<{ title: string; content: string }>;
+  guidelinesHighlights: Array<{ title: string; content: string; hidden?: boolean }>;
   faqs: Array<{ question: string; answer: string }>;
   optionalBlocks: Array<{
     type: string;
@@ -944,7 +944,7 @@ const CreatePage = () => {
                                     <div
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
-                                      className={`flex gap-2 p-3 rounded-lg border transition-colors ${snapshot.isDragging ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10" : "bg-card border-border"}`}
+                                      className={`flex gap-2 p-3 rounded-lg border transition-colors ${snapshot.isDragging ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10" : h.hidden ? "bg-card border-border opacity-50" : "bg-card border-border"}`}
                                     >
                                       <div className="flex-1 space-y-2">
                                         <div className="flex items-center gap-2">
@@ -983,9 +983,19 @@ const CreatePage = () => {
                                           )}
                                         </AnimatePresence>
                                       </div>
-                                      <button onClick={() => removeHighlight(i)} className="p-2 text-muted-foreground hover:text-destructive self-start pt-1 shrink-0">
-                                        <Trash2 className="w-4 h-4" />
-                                      </button>
+                                      <div className="flex flex-col gap-1 shrink-0">
+                                        <button
+                                          type="button"
+                                          onClick={() => { const arr = [...form.guidelinesHighlights]; arr[i] = { ...arr[i], hidden: !arr[i].hidden }; update("guidelinesHighlights", arr); }}
+                                          className={`p-2 transition-colors ${h.hidden ? "text-gold" : "text-muted-foreground hover:text-foreground"}`}
+                                          title={h.hidden ? "Mostrar destaque" : "Ocultar destaque"}
+                                        >
+                                          {h.hidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                        <button onClick={() => removeHighlight(i)} className="p-2 text-muted-foreground hover:text-destructive shrink-0">
+                                          <Trash2 className="w-4 h-4" />
+                                        </button>
+                                      </div>
                                     </div>
                                   )}
                                 </Draggable>

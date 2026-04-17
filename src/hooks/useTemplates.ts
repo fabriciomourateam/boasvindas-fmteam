@@ -15,7 +15,7 @@ export interface TemplateContent {
         title?: string;
         hideHighlightsTitle?: boolean;
         content: string;
-        highlights: Array<string | { title: string; content: string }>;
+        highlights: Array<string | { title: string; content: string; hidden?: boolean }>;
     };
     faqs?: Array<{ question: string; answer: string }>;
     links?: Array<{

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, X, GripVertical, Copy, ChevronDown, ChevronRight, Link } from "lucide-react";
+import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, EyeOff, X, GripVertical, Copy, ChevronDown, ChevronRight, Link } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -49,7 +49,7 @@ interface TemplateForm {
     guidelinesTitle: string;
     hideHighlightsTitle: boolean;
     guidelinesContent: string;
-    guidelinesHighlights: Array<{ title: string; content: string }>;
+    guidelinesHighlights: Array<{ title: string; content: string; hidden?: boolean }>;
     faqs: Array<{ question: string; answer: string }>;
     optionalBlocks: Array<{
         type: string;
@@ -724,7 +724,7 @@ const EditTemplate = () => {
                                                                         <div
                                                                             ref={provided.innerRef}
                                                                             {...provided.draggableProps}
-                                                                            className={`p-3 rounded-lg border transition-colors ${snapshot.isDragging ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10" : "bg-card border-border"}`}
+                                                                            className={`p-3 rounded-lg border transition-colors ${snapshot.isDragging ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50 z-10" : h.hidden ? "bg-card border-border opacity-50" : "bg-card border-border"}`}
                                                                         >
                                                                             <div className="flex items-center gap-2">
                                                                                 <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-gold p-1 -ml-1 shrink-0">
@@ -748,6 +748,14 @@ const EditTemplate = () => {
                                                                                     placeholder="Nome interno"
                                                                                 />
                                                                                 <div className="flex gap-1 shrink-0 ml-auto">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => { const arr = [...form.guidelinesHighlights]; arr[i] = { ...arr[i], hidden: !arr[i].hidden }; update("guidelinesHighlights", arr); }}
+                                                                                        className={`p-1.5 hover:bg-secondary rounded-md transition-colors ${h.hidden ? "text-gold" : "text-muted-foreground hover:text-foreground"}`}
+                                                                                        title={h.hidden ? "Mostrar destaque" : "Ocultar destaque"}
+                                                                                    >
+                                                                                        {h.hidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                                                    </button>
                                                                                     <button onClick={() => removeHighlight(i)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-secondary rounded-md" title="Excluir">
                                                                                         <Trash2 className="w-4 h-4" />
                                                                                     </button>

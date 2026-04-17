@@ -5,7 +5,7 @@ interface GuidelinesBlockProps {
   title?: string;
   icon?: string;
   content: string;
-  highlights?: Array<string | { title: string; content: string }>;
+  highlights?: Array<string | { title: string; content: string; hidden?: boolean }>;
   hideHighlightsTitle?: boolean;
 }
 
@@ -32,7 +32,7 @@ const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, conte
             <div className="mt-4 space-y-2">
               {!hideHighlightsTitle && <h4 className="font-semibold text-foreground mb-4">DESTAQUE</h4>}
               <ul className="space-y-3">
-                {highlights.map((highlight, index) => {
+                {highlights.filter((h) => typeof h === "string" || !h.hidden).map((highlight, index) => {
                   const contentHtml = typeof highlight === "string" ? highlight : highlight.content;
                   return (
                     <li key={index} className="flex gap-3">
