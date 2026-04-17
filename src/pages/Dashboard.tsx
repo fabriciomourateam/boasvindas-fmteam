@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Eye, Edit2, Copy, Trash2, FileText, LayoutTemplate, LogOut, ArrowLeft, Folder, FolderOutput, Tag, Settings2, X, MessageSquare, CheckSquare2, Square, FolderInput } from "lucide-react";
+import { Search, Plus, Eye, Edit2, Copy, Trash2, FileText, LayoutTemplate, LogOut, ArrowLeft, Folder, FolderOutput, Tag, Settings2, X, MessageSquare, CheckSquare2, Square, FolderInput, Pencil, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -55,6 +55,7 @@ const Dashboard = () => {
   const [editingTag, setEditingTag] = useState<{ old: string, new: string } | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkFolderTarget, setBulkFolderTarget] = useState("");
+  const [renamingFolder, setRenamingFolder] = useState<{ old: string; value: string } | null>(null);
 
   const navigate = useNavigate();
   const { signOut } = useRequireAuth();
@@ -103,6 +104,23 @@ const Dashboard = () => {
   const handleLogout = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const handleRenameFolder = async () => {
+    if (!renamingFolder) return;
+    const { old: oldName, value: newName } = renamingFolder;
+    if (!newName.trim() || newName.trim() === oldName) { setRenamingFolder(null); return; }
+    const toUpdate = pages.filter(p => (p.custom_content as any)?.folder === oldName);
+    try {
+      await Promise.all(toUpdate.map(p =>
+        updateMutation.mutateAsync({ id: p.id, custom_content: { ...(p.custom_content as any), folder: newName.trim() } })
+      ));
+      toast.success(`Pasta renomeada para "${newName.trim()}"`);
+      if (currentFolder === oldName) setCurrentFolder(newName.trim());
+    } catch {
+      toast.error("Erro ao renomear pasta.");
+    }
+    setRenamingFolder(null);
   };
 
   const toggleSelect = (id: string) => {
@@ -394,24 +412,54 @@ const Dashboard = () => {
                               ref={provided.innerRef}
                               {...provided.droppableProps}
                             >
-                              <motion.button
+                              <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: i * 0.05 }}
-                                onClick={() => setCurrentFolder(folder)}
-                                className={`flex flex-col items-center justify-center p-6 rounded-xl bg-card border transition-all text-center group w-full ${snapshot.isDraggingOver
+                                className={`relative flex flex-col items-center justify-center p-6 rounded-xl bg-card border transition-all text-center group w-full cursor-pointer ${snapshot.isDraggingOver
                                   ? "border-gold shadow-lg shadow-gold/20 scale-105 bg-gold/5"
                                   : "border-border hover:border-gold hover:shadow-gold/10"
                                   }`}
+                                onClick={() => { if (renamingFolder?.old !== folder) setCurrentFolder(folder); }}
                               >
-                                <Folder className={`w-10 h-10 mb-3 transition-transform ${snapshot.isDraggingOver ? "text-gold scale-125" : "text-gold group-hover:scale-110"
-                                  }`} />
-                                <h3 className="font-semibold text-foreground text-sm truncate w-full">{folder}</h3>
+                                {/* Botão renomear */}
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  onClick={(e) => { e.stopPropagation(); setRenamingFolder({ old: folder, value: folder }); }}
+                                  className="absolute top-2 right-2 p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-secondary transition-all text-muted-foreground hover:text-foreground"
+                                  title="Renomear pasta"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+
+                                <Folder className={`w-10 h-10 mb-3 transition-transform ${snapshot.isDraggingOver ? "text-gold scale-125" : "text-gold group-hover:scale-110"}`} />
+
+                                {renamingFolder?.old === folder ? (
+                                  <div
+                                    className="flex items-center gap-1 w-full"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <input
+                                      autoFocus
+                                      value={renamingFolder.value}
+                                      onChange={(e) => setRenamingFolder({ old: folder, value: e.target.value })}
+                                      onKeyDown={(e) => { if (e.key === "Enter") handleRenameFolder(); if (e.key === "Escape") setRenamingFolder(null); }}
+                                      className="flex-1 px-2 py-1 rounded border border-gold bg-background text-sm text-foreground text-center focus:outline-none"
+                                    />
+                                    <button onClick={handleRenameFolder} className="p-1 text-gold hover:text-gold-dark"><Check className="w-3.5 h-3.5" /></button>
+                                    <button onClick={() => setRenamingFolder(null)} className="p-1 text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
+                                  </div>
+                                ) : (
+                                  <h3 className="font-semibold text-foreground text-sm truncate w-full">{folder}</h3>
+                                )}
+
                                 <p className="text-xs text-muted-foreground mt-1">{itemsInFolder} {itemsInFolder === 1 ? 'aluno' : 'alunos'}</p>
                                 {snapshot.isDraggingOver && (
                                   <p className="text-xs text-gold font-medium mt-2 animate-pulse">Solte aqui</p>
                                 )}
-                              </motion.button>
+                              </motion.div>
                               <div className="hidden">{provided.placeholder}</div>
                             </div>
                           )}
