@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Eye, Edit2, Copy, Trash2, FileText, LayoutTemplate, LogOut, ArrowLeft, Folder, FolderOutput, Tag, Settings2, X, MessageSquare } from "lucide-react";
+import { Search, Plus, Eye, Edit2, Copy, Trash2, FileText, LayoutTemplate, LogOut, ArrowLeft, Folder, FolderOutput, Tag, Settings2, X, MessageSquare, CheckSquare2, Square, FolderInput } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -53,6 +53,8 @@ const Dashboard = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isManageTagsOpen, setIsManageTagsOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<{ old: string, new: string } | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkFolderTarget, setBulkFolderTarget] = useState("");
 
   const navigate = useNavigate();
   const { signOut } = useRequireAuth();
@@ -101,6 +103,33 @@ const Dashboard = () => {
   const handleLogout = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => setSelectedIds(new Set(pagesToDisplay.map(p => p.id)));
+  const clearSelection = () => { setSelectedIds(new Set()); setBulkFolderTarget(""); };
+
+  const handleBulkMove = async () => {
+    const target = bulkFolderTarget.trim();
+    if (!target || selectedIds.size === 0) return;
+    const toMove = pages.filter(p => selectedIds.has(p.id));
+    try {
+      await Promise.all(toMove.map(p => {
+        const cc = (p.custom_content as any) || {};
+        return updateMutation.mutateAsync({ id: p.id, custom_content: { ...cc, folder: target } });
+      }));
+      toast.success(`${toMove.length} aluno(s) movido(s) para "${target}"`);
+      clearSelection();
+    } catch {
+      toast.error("Erro ao mover alunos.");
+    }
   };
 
   const handleDragEnd = async (result: DropResult) => {
@@ -423,6 +452,22 @@ const Dashboard = () => {
                   {!currentFolder && visibleFolders.length > 0 && pagesToDisplay.length > 0 && (
                     <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 mt-6">Alunos sem pasta</h2>
                   )}
+                  {pagesToDisplay.length > 0 && (
+                    <div className="flex items-center justify-between mb-2">
+                      <button
+                        onClick={selectedIds.size === pagesToDisplay.length ? clearSelection : selectAll}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {selectedIds.size === pagesToDisplay.length && pagesToDisplay.length > 0
+                          ? <CheckSquare2 className="w-3.5 h-3.5 text-gold" />
+                          : <Square className="w-3.5 h-3.5" />}
+                        {selectedIds.size === pagesToDisplay.length && pagesToDisplay.length > 0 ? "Desmarcar todos" : "Selecionar todos"}
+                      </button>
+                      {selectedIds.size > 0 && (
+                        <span className="text-xs text-gold font-medium">{selectedIds.size} selecionado(s)</span>
+                      )}
+                    </div>
+                  )}
                   <Droppable droppableId={currentFolder || "__sem_pasta__"} isDropDisabled={!currentFolder}>
                     {(provided) => (
                       <div
@@ -445,10 +490,22 @@ const Dashboard = () => {
                                   transition={{ delay: index * 0.05 }}
                                   className={`p-4 rounded-lg bg-card border transition-colors select-none ${dragSnapshot.isDragging
                                     ? "border-gold shadow-xl shadow-gold/10 rotate-1 opacity-90"
+                                    : selectedIds.has(page.id)
+                                    ? "border-gold/60 bg-gold/5"
                                     : "border-border hover:border-gold/30"
                                     }`}
                                 >
                                   <div className="flex items-center justify-between gap-4">
+                                    <div
+                                      className="shrink-0 cursor-pointer p-1 -ml-1"
+                                      onMouseDown={(e) => e.stopPropagation()}
+                                      onPointerDown={(e) => e.stopPropagation()}
+                                      onClick={(e) => { e.stopPropagation(); toggleSelect(page.id); }}
+                                    >
+                                      {selectedIds.has(page.id)
+                                        ? <CheckSquare2 className="w-4 h-4 text-gold" />
+                                        : <Square className="w-4 h-4 text-muted-foreground/40 hover:text-muted-foreground" />}
+                                    </div>
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 mb-1">
                                         <h3 className="font-semibold text-foreground text-sm truncate">{page.student_name}</h3>
@@ -588,6 +645,35 @@ const Dashboard = () => {
           </DragDropContext>
         )}
       </main>
+
+      {/* Barra de ação em massa */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-gold/30 shadow-2xl shadow-black/40">
+          <span className="text-sm font-semibold text-gold whitespace-nowrap">{selectedIds.size} selecionado(s)</span>
+          <div className="w-px h-5 bg-border" />
+          <FolderInput className="w-4 h-4 text-muted-foreground shrink-0" />
+          <input
+            list="bulk-folder-list"
+            value={bulkFolderTarget}
+            onChange={(e) => setBulkFolderTarget(e.target.value)}
+            placeholder="Nome da pasta (ex: Abril 2025)"
+            className="w-52 px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold"
+          />
+          <datalist id="bulk-folder-list">
+            {allFolders.map(f => <option key={f} value={f} />)}
+          </datalist>
+          <button
+            onClick={handleBulkMove}
+            disabled={!bulkFolderTarget.trim()}
+            className="px-4 py-1.5 rounded-lg gradient-gold text-primary-foreground text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-gold transition-all"
+          >
+            Mover
+          </button>
+          <button onClick={clearSelection} className="p-1.5 rounded-md hover:bg-secondary transition-colors text-muted-foreground" title="Cancelar seleção">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Gerenciar Tags Global Modal */}
       <Dialog open={isManageTagsOpen} onOpenChange={setIsManageTagsOpen}>
