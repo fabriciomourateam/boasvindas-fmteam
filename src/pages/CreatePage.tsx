@@ -12,7 +12,7 @@ import type { TemplateContent, TemplateBlocks } from "@/hooks/useTemplates";
 import type { Json } from "@/integrations/supabase/types";
 import RichTextEditor from "@/components/RichTextEditor";
 import ImageUpload from "@/components/ImageUpload";
-import SortableSections, { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
+import SortableSections, { DEFAULT_SECTION_ORDER, normalizeSectionOrder } from "@/components/SortableSections";
 import SortableCustomBlocks from "@/components/SortableCustomBlocks";
 import LivePreviewModal from "@/components/LivePreviewModal";
 import { TagInput } from "@/components/TagInput";
@@ -326,7 +326,7 @@ const CreatePage = () => {
         optionalBlocks: cc.optionalBlocks || [],
         links: cc.links || [],
         tags: cc.tags || [],
-        sectionOrder: cc.sectionOrder || DEFAULT_SECTION_ORDER,
+        sectionOrder: normalizeSectionOrder(cc.sectionOrder || DEFAULT_SECTION_ORDER),
         collapsedSteps: cc.collapsedSteps || {},
         collapsedHighlights: cc.collapsedHighlights || {},
         collapsedOptionalBlocks: cc.collapsedOptionalBlocks || {},
@@ -395,7 +395,7 @@ const CreatePage = () => {
       hasAreaMembros: blocks.hasAreaMembros ?? prev.hasAreaMembros,
       hasApps: blocks.hasApps ?? prev.hasApps,
       optionalBlocks: blocks.optionalBlocks || prev.optionalBlocks,
-      sectionOrder: content.sectionOrder || prev.sectionOrder,
+      sectionOrder: normalizeSectionOrder(content.sectionOrder || prev.sectionOrder),
       collapsedSteps: content.collapsedSteps || prev.collapsedSteps,
       collapsedHighlights: content.collapsedHighlights || prev.collapsedHighlights,
       collapsedOptionalBlocks: content.collapsedOptionalBlocks || prev.collapsedOptionalBlocks,

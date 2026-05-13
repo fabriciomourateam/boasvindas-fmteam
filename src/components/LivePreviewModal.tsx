@@ -9,7 +9,7 @@ import OptionalBlocks from "@/components/student-page/OptionalBlocks";
 import SupportSection from "@/components/student-page/SupportSection";
 import FooterSection from "@/components/student-page/FooterSection";
 import StandardBlocksGrid from "@/components/student-page/StandardBlocksGrid";
-import { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
+import { DEFAULT_SECTION_ORDER, normalizeSectionOrder } from "@/components/SortableSections";
 import { mergeStandardBlocks, normalizeStandardBlocksOrder } from "@/pages/CreatePage";
 
 const objectiveLabels: Record<string, string> = {
@@ -50,7 +50,7 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
         hideHighlightsTitle = false,
         optionalBlocks = [],
         links = [],
-        sectionOrder = DEFAULT_SECTION_ORDER,
+        sectionOrder: rawSectionOrder,
         standardBlocks: rawStandardBlocks,
         standardBlocksOrder: rawStandardBlocksOrder,
         extrasImageUrl = "",
@@ -68,6 +68,7 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
     const firstName = isTemplate ? "Aluno(a)" : (name ? name.split(" ")[0] : "Aluno(a)");
 
     const standardBlocksOrder = normalizeStandardBlocksOrder(rawStandardBlocksOrder);
+    const sectionOrder: string[] = normalizeSectionOrder(rawSectionOrder || DEFAULT_SECTION_ORDER);
     const standardBlocks = mergeStandardBlocks(rawStandardBlocks, {
         has_bioimpedancia: hasBioimpedancia,
         has_psicologa: hasPsicologa,

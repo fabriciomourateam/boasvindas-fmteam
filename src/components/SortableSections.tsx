@@ -21,6 +21,34 @@ export const SECTION_LABELS: Record<string, string> = {
     support: "Área de Suporte (WhatsApp)",
 };
 
+/** Normaliza sectionOrder: insere seções faltantes na posição default e remove obsoletas (ex: 'credentials' legado). */
+export function normalizeSectionOrder(raw: any): string[] {
+    const valid = new Set(DEFAULT_SECTION_ORDER);
+    const seen = new Set<string>();
+    const filtered: string[] = Array.isArray(raw)
+        ? raw.filter((s: any) => {
+            if (typeof s !== "string") return false;
+            if (!valid.has(s)) return false;
+            if (seen.has(s)) return false;
+            seen.add(s);
+            return true;
+        })
+        : [];
+    // Para cada seção do default que está faltando, inserir na sua posição default
+    DEFAULT_SECTION_ORDER.forEach((s, defaultIdx) => {
+        if (filtered.includes(s)) return;
+        // Acha posição: antes da próxima seção que JÁ está no filtered
+        let insertAt = filtered.length;
+        for (let i = defaultIdx + 1; i < DEFAULT_SECTION_ORDER.length; i++) {
+            const next = DEFAULT_SECTION_ORDER[i];
+            const idx = filtered.indexOf(next);
+            if (idx >= 0) { insertAt = idx; break; }
+        }
+        filtered.splice(insertAt, 0, s);
+    });
+    return filtered;
+}
+
 interface SortableSectionsProps {
     items: string[];
     onChange: (newItems: string[]) => void;

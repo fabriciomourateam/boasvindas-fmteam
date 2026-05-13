@@ -12,7 +12,7 @@ import StandardBlocksGrid from "@/components/student-page/StandardBlocksGrid";
 import { Toaster } from "sonner";
 import { useStudentPage } from "@/hooks/useStudentPages";
 import { Loader2 } from "lucide-react";
-import { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
+import { DEFAULT_SECTION_ORDER, normalizeSectionOrder } from "@/components/SortableSections";
 import { mergeStandardBlocks, normalizeStandardBlocksOrder } from "@/pages/CreatePage";
 
 const objectiveLabels: Record<string, string> = {
@@ -87,7 +87,7 @@ const StudentPage = () => {
   // Extract first name
   const firstName = page.student_name.split(" ")[0];
 
-  const sectionOrder: string[] = cc.sectionOrder || DEFAULT_SECTION_ORDER;
+  const sectionOrder: string[] = normalizeSectionOrder(cc.sectionOrder || DEFAULT_SECTION_ORDER);
 
   const renderSection = (section: string) => {
     switch (section) {
