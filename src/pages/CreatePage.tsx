@@ -175,7 +175,7 @@ const defaultForm: FormState = {
   name: "",
   folder: "",
   objective: "emagrecimento",
-  plan: "premium_anual",
+  plan: "Anual",
   hasTreino: true,
   hasPsicologa: false,
   hasBioimpedancia: false,
