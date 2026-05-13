@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Search, Plus, Eye, Edit2, Copy, Trash2, FileText, LayoutTemplate, LogOut, ArrowLeft, Folder, FolderOutput, Tag, Settings2, X, MessageSquare, CheckSquare2, Square, FolderInput, Pencil, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -267,20 +267,20 @@ const Dashboard = () => {
               <Settings2 className="w-4 h-4" />
               <span className="hidden sm:inline">Tags</span>
             </button>
-            <button
-              onClick={() => navigate("/admin/templates")}
+            <Link
+              to="/admin/templates"
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/20 text-white text-sm hover:bg-white/5 transition-colors"
             >
               <LayoutTemplate className="w-4 h-4" />
               <span className="hidden sm:inline">Templates</span>
-            </button>
-            <button
-              onClick={() => navigate("/admin/criar")}
+            </Link>
+            <Link
+              to="/admin/criar"
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg gradient-gold text-primary-foreground font-semibold text-sm hover:shadow-gold transition-all"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Nova Página</span>
-            </button>
+            </Link>
             <button
               onClick={handleLogout}
               className="p-2.5 rounded-lg border border-white/20 text-white/60 hover:text-white hover:bg-white/5 transition-colors"
@@ -602,13 +602,13 @@ const Dashboard = () => {
                                           </div>
                                         </PopoverContent>
                                       </Popover>
-                                      <button
-                                        onClick={() => navigate(`/aluno/${page.slug}`)}
+                                      <Link
+                                        to={`/aluno/${page.slug}`}
                                         className="p-2 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
                                         title="Visualizar"
                                       >
                                         <Eye className="w-4 h-4" />
-                                      </button>
+                                      </Link>
                                       <button
                                         onClick={() => {
                                           const url = `${window.location.origin}/aluno/${page.slug}`;
@@ -642,13 +642,13 @@ const Dashboard = () => {
                                       >
                                         <MessageSquare className="w-4 h-4" />
                                       </button>
-                                      <button
-                                        onClick={() => navigate(`/admin/editar/${page.id}`)}
+                                      <Link
+                                        to={`/admin/editar/${page.id}`}
                                         className="p-2 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
                                         title="Editar"
                                       >
                                         <Edit2 className="w-4 h-4" />
-                                      </button>
+                                      </Link>
                                       <button
                                         onClick={() => handleDelete(page.id, page.student_name)}
                                         className="p-2 rounded-md hover:bg-destructive/10 transition-colors text-muted-foreground hover:text-destructive"

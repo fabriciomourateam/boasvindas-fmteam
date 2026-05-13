@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams, Link as RouterLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, EyeOff, X, GripVertical, Copy, ChevronDown, ChevronRight, Link } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
@@ -341,10 +341,10 @@ const EditTemplate = () => {
         <div className="min-h-screen bg-secondary/30">
             <header className="gradient-dark px-4 sm:px-8 py-4">
                 <div className="max-w-3xl mx-auto flex items-center justify-between">
-                    <button onClick={() => navigate("/admin/templates")} className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors">
+                    <RouterLink to="/admin/templates" className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors">
                         <ArrowLeft className="w-4 h-4" />
                         Voltar
-                    </button>
+                    </RouterLink>
                     <div className="flex items-center gap-2">
                         <LivePreviewModal formData={form} isTemplate={true} />
                         <button onClick={handleSave} className="px-5 py-2.5 rounded-lg gradient-gold text-primary-foreground text-sm font-semibold hover:shadow-gold transition-all">

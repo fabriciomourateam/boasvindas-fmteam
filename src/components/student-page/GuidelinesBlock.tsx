@@ -6,10 +6,11 @@ interface GuidelinesBlockProps {
   icon?: string;
   content: string;
   highlights?: Array<string | { title: string; content: string; hidden?: boolean }>;
+  hideTitle?: boolean;
   hideHighlightsTitle?: boolean;
 }
 
-const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, content, highlights, hideHighlightsTitle }: GuidelinesBlockProps) => {
+const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, content, highlights, hideTitle, hideHighlightsTitle }: GuidelinesBlockProps) => {
   return (
     <section className="px-4 sm:px-8 py-8 bg-background">
       <div className="max-w-lg mx-auto">
@@ -19,9 +20,11 @@ const GuidelinesBlock = ({ title = "📌 Orientações Importantes", icon, conte
           viewport={{ once: true }}
           className="p-6 rounded-lg border border-gold/20 bg-gold/5"
         >
-          <h3 className="font-display text-xl sm:text-2xl text-foreground mb-4">
-            {icon || ""} {title}
-          </h3>
+          {!hideTitle && (
+            <h3 className="font-display text-xl sm:text-2xl text-foreground mb-4">
+              {icon || ""} {title}
+            </h3>
+          )}
 
           <div
             className="text-foreground text-sm leading-relaxed quill-content"

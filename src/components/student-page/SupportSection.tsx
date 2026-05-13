@@ -1,25 +1,15 @@
 import { motion } from "framer-motion";
-import { MessageCircle, HelpCircle, ChevronDown } from "lucide-react";
-import { useState } from "react";
-
-interface FAQ {
-  question: string;
-  answer: string;
-}
+import { MessageCircle } from "lucide-react";
 
 interface SupportSectionProps {
   whatsappUrl?: string;
-  faqs?: FAQ[];
   supportHours?: string;
 }
 
-const SupportSection = ({ whatsappUrl, faqs, supportHours }: SupportSectionProps) => {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
+const SupportSection = ({ whatsappUrl, supportHours }: SupportSectionProps) => {
   return (
     <section className="px-4 sm:px-8 py-10 bg-background">
       <div className="max-w-lg mx-auto space-y-6">
-        {/* Support block */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -47,41 +37,6 @@ const SupportSection = ({ whatsappUrl, faqs, supportHours }: SupportSectionProps
             </a>
           )}
         </motion.div>
-
-        {/* FAQs */}
-        {faqs && faqs.length > 0 && (
-          <div>
-            <h3 className="font-display text-xl text-foreground mb-4 flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-gold" />
-              DÚVIDAS FREQUENTES
-            </h3>
-            <div className="space-y-2">
-              {faqs.map((faq, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="rounded-lg border border-border bg-card overflow-hidden"
-                >
-                  <button
-                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                    className="w-full flex items-center justify-between p-4 text-left"
-                  >
-                    <span className="font-medium text-sm text-foreground">{faq.question}</span>
-                    <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${openFaq === index ? "rotate-180" : ""}`} />
-                  </button>
-                  {openFaq === index && (
-                    <div className="px-4 pb-4 text-sm text-muted-foreground">
-                      {faq.answer}
-                    </div>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );

@@ -40,6 +40,8 @@ export interface TemplateContent {
     collapsedSteps?: Record<number, boolean>;
     collapsedHighlights?: Record<number, boolean>;
     collapsedOptionalBlocks?: Record<number, boolean>;
+    standardBlocks?: any;
+    extrasImageUrl?: string;
 }
 
 export interface TemplateBlocks {

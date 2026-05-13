@@ -4,15 +4,13 @@ import HeroSection from "@/components/student-page/HeroSection";
 import PlanSummary from "@/components/student-page/PlanSummary";
 import NextSteps from "@/components/student-page/NextSteps";
 import LinksBlock from "@/components/student-page/LinksBlock";
-import CredentialsBlock from "@/components/student-page/CredentialsBlock";
 import GuidelinesBlock from "@/components/student-page/GuidelinesBlock";
 import OptionalBlocks from "@/components/student-page/OptionalBlocks";
 import SupportSection from "@/components/student-page/SupportSection";
 import FooterSection from "@/components/student-page/FooterSection";
+import StandardBlocksGrid from "@/components/student-page/StandardBlocksGrid";
 import { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
-
-import webdietTutorial from "@/assets/webdiet-tutorial.png";
-import mfitTutorial from "@/assets/mfit-tutorial.png";
+import { mergeStandardBlocks } from "@/pages/CreatePage";
 
 const objectiveLabels: Record<string, string> = {
     emagrecimento: "Emagrecimento",
@@ -36,13 +34,8 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
         name,
         objective,
         plan,
-        hasApps,
         membersLink,
         supportLink,
-        webdietLogin,
-        webdietPassword,
-        mfitLogin,
-        mfitPassword,
         strategy,
         duration,
         whatsappUrl,
@@ -53,14 +46,38 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
         guidelinesContent,
         guidelinesHighlights = [],
         guidelinesTitle = "📌 Orientações Importantes",
+        hideGuidelinesTitle = false,
         hideHighlightsTitle = false,
-        faqs = [],
         optionalBlocks = [],
         links = [],
         sectionOrder = DEFAULT_SECTION_ORDER,
+        standardBlocks: rawStandardBlocks,
+        extrasImageUrl = "",
+        hasTreino,
+        hasPsicologa,
+        hasBioimpedancia,
+        hasAreaMembros,
+        hasApps,
+        webdietLogin,
+        webdietPassword,
+        mfitLogin,
+        mfitPassword,
     } = formData;
 
     const firstName = isTemplate ? "Aluno(a)" : (name ? name.split(" ")[0] : "Aluno(a)");
+
+    const standardBlocks = mergeStandardBlocks(rawStandardBlocks, {
+        has_bioimpedancia: hasBioimpedancia,
+        has_psicologa: hasPsicologa,
+        has_apps: hasApps,
+        has_treino: hasTreino,
+        has_area_membros: hasAreaMembros,
+        webdiet_login: webdietLogin,
+        webdiet_password: webdietPassword,
+        mfit_login: mfitLogin,
+        mfit_password: mfitPassword,
+        members_link: membersLink,
+    });
 
     // Build links array
     const allLinks = [
@@ -72,29 +89,6 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
             : []),
         ...links,
     ];
-
-    // Build credentials
-    const credentials = [];
-    if (hasApps) {
-        if (webdietLogin || webdietPassword) {
-            credentials.push({
-                appName: "WebDiet",
-                login: webdietLogin || "",
-                password: webdietPassword || "",
-                instructions: "Abra o app e clique em 'Já me consultei'",
-                tutorialImage: webdietTutorial,
-            });
-        }
-        if (mfitLogin || mfitPassword) {
-            credentials.push({
-                appName: "MFit Personal",
-                login: mfitLogin || "",
-                password: mfitPassword || "",
-                instructions: "Clique em 'Sou aluno' e entre com os dados",
-                tutorialImage: mfitTutorial,
-            });
-        }
-    }
 
     const renderSection = (section: string) => {
         switch (section) {
@@ -113,21 +107,13 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
             case "links":
                 return allLinks.length > 0 ? <LinksBlock key="links" links={allLinks} /> : null;
             case "credentials":
-                return credentials.length > 0 ? (
-                    <section key="credentials" className="px-4 py-8 bg-background">
-                        <div className="max-w-lg mx-auto space-y-4">
-                            <h3 className="font-display text-2xl text-foreground">🔐 CREDENCIAIS DE ACESSO</h3>
-                            {credentials.map((cred, i) => (
-                                <CredentialsBlock key={i} {...cred} />
-                            ))}
-                        </div>
-                    </section>
-                ) : null;
+                return null;
             case "guidelines":
                 return (guidelinesContent || (guidelinesHighlights && guidelinesHighlights.length > 0)) ? (
                     <GuidelinesBlock
                         key="guidelines"
                         title={guidelinesTitle}
+                        hideTitle={hideGuidelinesTitle}
                         hideHighlightsTitle={hideHighlightsTitle}
                         content={guidelinesContent || ""}
                         highlights={guidelinesHighlights || []}
@@ -135,12 +121,13 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
                 ) : null;
             case "optionalBlocks":
                 return optionalBlocks.length > 0 ? <OptionalBlocks key="optionalBlocks" blocks={optionalBlocks} /> : null;
+            case "standardButtons":
+                return <StandardBlocksGrid key="standardButtons" data={standardBlocks} />;
             case "support":
                 return (
                     <SupportSection
                         key="support"
                         whatsappUrl={whatsappUrl || supportLink || undefined}
-                        faqs={faqs.length > 0 ? faqs : undefined}
                         supportHours={supportHours || undefined}
                     />
                 );
@@ -166,6 +153,12 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
                         objective={objectiveLabels[objective] || objective}
                     />
                     {sectionOrder.map(renderSection)}
+                    {!sectionOrder.includes("standardButtons") && <StandardBlocksGrid data={standardBlocks} />}
+                    {extrasImageUrl && (
+                        <section className="bg-background">
+                            <img src={extrasImageUrl} alt="" className="w-full max-w-lg mx-auto block" />
+                        </section>
+                    )}
                     <FooterSection />
                 </div>
             </DialogContent>

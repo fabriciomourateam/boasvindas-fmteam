@@ -4,8 +4,8 @@ import { GripVertical, EyeOff, Plus } from "lucide-react";
 export const DEFAULT_SECTION_ORDER = [
     "summary",
     "steps",
+    "standardButtons",
     "links",
-    "credentials",
     "guidelines",
     "optionalBlocks",
     "support"
@@ -14,11 +14,11 @@ export const DEFAULT_SECTION_ORDER = [
 export const SECTION_LABELS: Record<string, string> = {
     summary: "Resumo do Plano (Objetivo, Estratégia)",
     steps: "Próximos Passos",
+    standardButtons: "Botões (Bioimpedância, Plano, Treino, etc.)",
     links: "Links Padrão e Adicionais",
-    credentials: "Credenciais de Apps",
     guidelines: "Orientações e Destaques",
     optionalBlocks: "Blocos Opcionais / Customizados",
-    support: "Área de Suporte (WhatsApp / FAQs)",
+    support: "Área de Suporte (WhatsApp)",
 };
 
 interface SortableSectionsProps {

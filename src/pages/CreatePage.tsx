@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link as RouterLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Save, AlertCircle, Plus, Trash2, ArrowLeft, Eye, EyeOff, X, LayoutTemplate, GripVertical, Copy, ChevronDown, ChevronRight, Link } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
@@ -16,6 +16,8 @@ import SortableSections, { DEFAULT_SECTION_ORDER } from "@/components/SortableSe
 import SortableCustomBlocks from "@/components/SortableCustomBlocks";
 import LivePreviewModal from "@/components/LivePreviewModal";
 import { TagInput } from "@/components/TagInput";
+import ImageUpload from "@/components/ImageUpload";
+import StandardBlocksEditor from "@/components/StandardBlocksEditor";
 
 const objectives = [
   { value: "emagrecimento", label: "Emagrecimento" },
@@ -29,6 +31,91 @@ const plans = [
   { value: "premium_anual", label: "Premium Anual" },
 ];
 
+export interface StandardBlock {
+  enabled: boolean;
+  imageUrl?: string;
+  login?: string;
+  password?: string;
+  androidUrl?: string;
+  iosUrl?: string;
+}
+
+export interface AreaMembrosBlock {
+  enabled: boolean;
+  url?: string;
+}
+
+export interface StandardBlocksData {
+  bioimpedancia: StandardBlock;
+  planoAlimentar: StandardBlock;
+  treino: StandardBlock;
+  checkins: StandardBlock;
+  psicologa: StandardBlock;
+  areaMembros: AreaMembrosBlock;
+}
+
+const emptyStandardBlocks: StandardBlocksData = {
+  bioimpedancia: { enabled: false },
+  planoAlimentar: { enabled: false },
+  treino: { enabled: false },
+  checkins: { enabled: false },
+  psicologa: { enabled: false },
+  areaMembros: { enabled: false },
+};
+
+/** Mescla standardBlocks vindo do banco com defaults, e migra campos legados (webdiet/mfit/members_link/has_*) se ainda não existirem no novo formato. */
+export function mergeStandardBlocks(
+  raw: any,
+  legacy: {
+    has_bioimpedancia?: boolean;
+    has_psicologa?: boolean;
+    has_apps?: boolean;
+    has_treino?: boolean;
+    has_area_membros?: boolean;
+    webdiet_login?: string | null;
+    webdiet_password?: string | null;
+    mfit_login?: string | null;
+    mfit_password?: string | null;
+    members_link?: string | null;
+  } = {}
+): StandardBlocksData {
+  const r = (raw || {}) as Partial<StandardBlocksData>;
+  return {
+    bioimpedancia: {
+      enabled: r.bioimpedancia?.enabled ?? legacy.has_bioimpedancia ?? false,
+      imageUrl: r.bioimpedancia?.imageUrl ?? "",
+    },
+    planoAlimentar: {
+      enabled: r.planoAlimentar?.enabled ?? legacy.has_apps ?? false,
+      imageUrl: r.planoAlimentar?.imageUrl ?? "",
+      login: r.planoAlimentar?.login ?? legacy.webdiet_login ?? "",
+      password: r.planoAlimentar?.password ?? legacy.webdiet_password ?? "",
+      androidUrl: r.planoAlimentar?.androidUrl ?? "",
+      iosUrl: r.planoAlimentar?.iosUrl ?? "",
+    },
+    treino: {
+      enabled: r.treino?.enabled ?? legacy.has_treino ?? false,
+      imageUrl: r.treino?.imageUrl ?? "",
+      login: r.treino?.login ?? legacy.mfit_login ?? "",
+      password: r.treino?.password ?? legacy.mfit_password ?? "",
+      androidUrl: r.treino?.androidUrl ?? "",
+      iosUrl: r.treino?.iosUrl ?? "",
+    },
+    checkins: {
+      enabled: r.checkins?.enabled ?? false,
+      imageUrl: r.checkins?.imageUrl ?? "",
+    },
+    psicologa: {
+      enabled: r.psicologa?.enabled ?? legacy.has_psicologa ?? false,
+      imageUrl: r.psicologa?.imageUrl ?? "",
+    },
+    areaMembros: {
+      enabled: r.areaMembros?.enabled ?? legacy.has_area_membros ?? false,
+      url: r.areaMembros?.url ?? legacy.members_link ?? "",
+    },
+  };
+}
+
 interface FormState {
   name: string;
   folder: string;
@@ -39,6 +126,8 @@ interface FormState {
   hasBioimpedancia: boolean;
   hasAreaMembros: boolean;
   hasApps: boolean;
+  standardBlocks: StandardBlocksData;
+  extrasImageUrl: string;
   membersLink: string;
   supportLink: string;
   webdietLogin: string;
@@ -54,6 +143,7 @@ interface FormState {
   stepsTitle: string;
   hideStepsTitle: boolean;
   guidelinesTitle: string;
+  hideGuidelinesTitle: boolean;
   hideHighlightsTitle: boolean;
   guidelinesContent: string;
   guidelinesHighlights: Array<{ title: string; content: string; hidden?: boolean }>;
@@ -85,12 +175,14 @@ const defaultForm: FormState = {
   name: "",
   folder: "",
   objective: "emagrecimento",
-  plan: "shape",
+  plan: "premium_anual",
   hasTreino: true,
   hasPsicologa: false,
   hasBioimpedancia: false,
   hasAreaMembros: true,
   hasApps: true,
+  standardBlocks: emptyStandardBlocks,
+  extrasImageUrl: "",
   membersLink: "",
   supportLink: "",
   webdietLogin: "",
@@ -106,6 +198,7 @@ const defaultForm: FormState = {
   stepsTitle: "📋 PRÓXIMOS PASSOS",
   hideStepsTitle: false,
   guidelinesTitle: "📌 Orientações Importantes",
+  hideGuidelinesTitle: false,
   hideHighlightsTitle: false,
   guidelinesContent: "",
   guidelinesHighlights: [],
@@ -131,8 +224,13 @@ const CreatePage = () => {
   const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(true);
   const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(false);
   const [isStandardBlocksCollapsed, setIsStandardBlocksCollapsed] = useState(true);
-  const [isNotesCollapsed, setIsNotesCollapsed] = useState(true);
+  const [isNotesCollapsed, setIsNotesCollapsed] = useState(false);
   const [isGuidelinesCollapsed, setIsGuidelinesCollapsed] = useState(false);
+  const [isBasicInfoCollapsed, setIsBasicInfoCollapsed] = useState(true);
+  const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
+  const [isStepsCollapsed, setIsStepsCollapsed] = useState(false);
+  const [isLinksCollapsed, setIsLinksCollapsed] = useState(true);
+  const [isExtrasCollapsed, setIsExtrasCollapsed] = useState(true);
   const toggleStepCollapse = (i: number) => {
     const novoEstado = { ...form.collapsedSteps, [i]: !form.collapsedSteps[i] };
     update("collapsedSteps", novoEstado);
@@ -184,6 +282,7 @@ const CreatePage = () => {
         stepsTitle: cc.stepsTitle || "📋 PRÓXIMOS PASSOS",
         hideStepsTitle: cc.hideStepsTitle ?? false,
         guidelinesTitle: cc.guidelines?.title || "📌 Orientações Importantes",
+        hideGuidelinesTitle: cc.guidelines?.hideGuidelinesTitle ?? false,
         hideHighlightsTitle: cc.guidelines?.hideHighlightsTitle ?? false,
         guidelinesContent: cc.guidelines?.content || "",
         guidelinesHighlights: (cc.guidelines?.highlights || []).map((h: any) =>
@@ -197,6 +296,19 @@ const CreatePage = () => {
         collapsedSteps: cc.collapsedSteps || {},
         collapsedHighlights: cc.collapsedHighlights || {},
         collapsedOptionalBlocks: cc.collapsedOptionalBlocks || {},
+        standardBlocks: mergeStandardBlocks(cc.standardBlocks, {
+          has_bioimpedancia: existingPage.has_bioimpedancia,
+          has_psicologa: existingPage.has_psicologa,
+          has_apps: existingPage.has_apps,
+          has_treino: existingPage.has_treino,
+          has_area_membros: existingPage.has_area_membros,
+          webdiet_login: existingPage.webdiet_login,
+          webdiet_password: existingPage.webdiet_password,
+          mfit_login: existingPage.mfit_login,
+          mfit_password: existingPage.mfit_password,
+          members_link: existingPage.members_link,
+        }),
+        extrasImageUrl: cc.extrasImageUrl || "",
       });
     }
   }, [isEditing, existingPage]);
@@ -226,6 +338,7 @@ const CreatePage = () => {
       stepsTitle: content.stepsTitle || prev.stepsTitle,
       hideStepsTitle: content.hideStepsTitle ?? prev.hideStepsTitle,
       guidelinesTitle: content.guidelines?.title || prev.guidelinesTitle,
+      hideGuidelinesTitle: content.guidelines?.hideGuidelinesTitle ?? prev.hideGuidelinesTitle,
       hideHighlightsTitle: content.guidelines?.hideHighlightsTitle ?? prev.hideHighlightsTitle,
       guidelinesContent: content.guidelines?.content || prev.guidelinesContent,
       guidelinesHighlights: content.guidelines?.highlights
@@ -251,6 +364,19 @@ const CreatePage = () => {
       collapsedSteps: content.collapsedSteps || prev.collapsedSteps,
       collapsedHighlights: content.collapsedHighlights || prev.collapsedHighlights,
       collapsedOptionalBlocks: content.collapsedOptionalBlocks || prev.collapsedOptionalBlocks,
+      standardBlocks: mergeStandardBlocks(content.standardBlocks, {
+        has_bioimpedancia: blocks.hasBioimpedancia,
+        has_psicologa: blocks.hasPsicologa,
+        has_apps: blocks.hasApps,
+        has_treino: blocks.hasTreino,
+        has_area_membros: blocks.hasAreaMembros,
+        webdiet_login: content.credentials?.webdietLogin,
+        webdiet_password: content.credentials?.webdietPassword,
+        mfit_login: content.credentials?.mfitLogin,
+        mfit_password: content.credentials?.mfitPassword,
+        members_link: content.membersLink,
+      }),
+      extrasImageUrl: content.extrasImageUrl ?? prev.extrasImageUrl,
     }));
 
     toast.success("Template aplicado!");
@@ -266,6 +392,7 @@ const CreatePage = () => {
       hideStepsTitle: form.hideStepsTitle,
       guidelines: {
         title: form.guidelinesTitle,
+        hideGuidelinesTitle: form.hideGuidelinesTitle,
         hideHighlightsTitle: form.hideHighlightsTitle,
         content: form.guidelinesContent,
         highlights: form.guidelinesHighlights,
@@ -278,6 +405,8 @@ const CreatePage = () => {
       collapsedSteps: form.collapsedSteps,
       collapsedHighlights: form.collapsedHighlights,
       collapsedOptionalBlocks: form.collapsedOptionalBlocks,
+      standardBlocks: form.standardBlocks,
+      extrasImageUrl: form.extrasImageUrl,
     } as Json;
   };
 
@@ -289,23 +418,24 @@ const CreatePage = () => {
 
     const slug = generateSlug(form.name);
 
+    const sb = form.standardBlocks;
     const pageData = {
       student_name: form.name,
       slug,
       objective: form.objective as any,
       plan: form.plan as any,
       status,
-      has_treino: form.hasTreino,
-      has_psicologa: form.hasPsicologa,
-      has_bioimpedancia: form.hasBioimpedancia,
-      has_area_membros: form.hasAreaMembros,
-      has_apps: form.hasApps,
-      members_link: form.membersLink || null,
+      has_treino: sb.treino.enabled,
+      has_psicologa: sb.psicologa.enabled,
+      has_bioimpedancia: sb.bioimpedancia.enabled,
+      has_area_membros: sb.areaMembros.enabled,
+      has_apps: sb.planoAlimentar.enabled,
+      members_link: sb.areaMembros.url || form.membersLink || null,
       support_link: form.supportLink || null,
-      webdiet_login: form.webdietLogin || null,
-      webdiet_password: form.webdietPassword || null,
-      mfit_login: form.mfitLogin || null,
-      mfit_password: form.mfitPassword || null,
+      webdiet_login: sb.planoAlimentar.login || null,
+      webdiet_password: sb.planoAlimentar.password || null,
+      mfit_login: sb.treino.login || null,
+      mfit_password: sb.treino.password || null,
       notes: form.notes || null,
       strategy: form.strategy || null,
       duration: form.duration || null,
@@ -348,6 +478,7 @@ const CreatePage = () => {
       hideStepsTitle: form.hideStepsTitle,
       guidelines: {
         title: form.guidelinesTitle,
+        hideGuidelinesTitle: form.hideGuidelinesTitle,
         hideHighlightsTitle: form.hideHighlightsTitle,
         content: form.guidelinesContent,
         highlights: form.guidelinesHighlights,
@@ -368,6 +499,8 @@ const CreatePage = () => {
       collapsedSteps: form.collapsedSteps,
       collapsedHighlights: form.collapsedHighlights,
       collapsedOptionalBlocks: form.collapsedOptionalBlocks,
+      standardBlocks: form.standardBlocks,
+      extrasImageUrl: form.extrasImageUrl,
     };
 
     const blocks: TemplateBlocks = {
@@ -483,10 +616,10 @@ const CreatePage = () => {
     <div className="min-h-screen bg-secondary/30">
       <header className="gradient-dark px-4 sm:px-8 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <button onClick={() => navigate("/admin")} className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors">
+          <RouterLink to="/admin" className="flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Voltar
-          </button>
+          </RouterLink>
           <div className="flex gap-2">
             <LivePreviewModal formData={form} />
             <button
@@ -603,31 +736,14 @@ const CreatePage = () => {
           </div>
 
           {/* Basic info */}
-          <div className="p-5 rounded-lg bg-card border border-border space-y-4">
-            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">Dados do Aluno</h2>
+          <div className="p-5 rounded-lg bg-card border border-border">
+            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider mb-4">Dados do Aluno</h2>
+
+            {/* Sempre visíveis: Nome + Plano */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs text-muted-foreground font-medium">Nome do Aluno</label>
                 <input value={form.name} onChange={(e) => update("name", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground" placeholder="Nome completo" />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground font-medium">Pasta (Organização Interna)</label>
-                <input list="folder-list" value={form.folder} onChange={(e) => update("folder", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground" placeholder="Ex: Em Andamento, Presencial..." />
-                <datalist id="folder-list">
-                  {uniqueFolders.map(f => (
-                    <option key={f} value={f} />
-                  ))}
-                </datalist>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-muted-foreground font-medium">Objetivo</label>
-                <select value={form.objective} onChange={(e) => update("objective", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground">
-                  {objectives.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
               </div>
               <div>
                 <label className="text-xs text-muted-foreground font-medium">Plano</label>
@@ -640,44 +756,104 @@ const CreatePage = () => {
               </div>
             </div>
 
-            {/* Tags section */}
-            <div>
-              <label className="text-xs text-muted-foreground font-medium mb-1 block">Tags do Aluno</label>
-              <TagInput
-                value={form.tags}
-                onChange={(tags) => update("tags", tags)}
-                availableTags={allAvailableTags}
-                placeholder="Selecione ou adicione tags (ex: Prioridade, Risco de Evasão)"
-              />
-            </div>
+            {/* Toggle pra expandir o resto */}
+            <button
+              type="button"
+              onClick={() => setIsBasicInfoCollapsed(!isBasicInfoCollapsed)}
+              className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isBasicInfoCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              {isBasicInfoCollapsed ? "Mostrar mais campos (Pasta, Objetivo, Tags, Duração, Suporte)" : "Ocultar campos adicionais"}
+            </button>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-muted-foreground font-medium">Duração</label>
-                <input value={form.duration} onChange={(e) => update("duration", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="12 meses de acompanhamento" />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground font-medium">Horário Suporte</label>
-                <input value={form.supportHours} onChange={(e) => update("supportHours", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Segunda à Sexta: 08h-18h" />
-              </div>
-            </div>
+            <AnimatePresence>
+              {!isBasicInfoCollapsed && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="space-y-4 overflow-hidden pt-4 mt-2 border-t border-border"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-muted-foreground font-medium">Pasta (Organização Interna)</label>
+                      <input list="folder-list" value={form.folder} onChange={(e) => update("folder", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground" placeholder="Ex: Em Andamento, Presencial..." />
+                      <datalist id="folder-list">
+                        {uniqueFolders.map(f => (
+                          <option key={f} value={f} />
+                        ))}
+                      </datalist>
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground font-medium">Objetivo</label>
+                      <select value={form.objective} onChange={(e) => update("objective", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground">
+                        {objectives.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-muted-foreground font-medium mb-1 block">Tags do Aluno</label>
+                    <TagInput
+                      value={form.tags}
+                      onChange={(tags) => update("tags", tags)}
+                      availableTags={allAvailableTags}
+                      placeholder="Selecione ou adicione tags (ex: Prioridade, Risco de Evasão)"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-muted-foreground font-medium">Duração</label>
+                      <input value={form.duration} onChange={(e) => update("duration", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="12 meses de acompanhamento" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground font-medium">Horário Suporte</label>
+                      <input value={form.supportHours} onChange={(e) => update("supportHours", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Segunda à Sexta: 08h-18h" />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {form.sectionOrder.map((section) => {
             switch (section) {
               case "summary":
                 return (
-                  <div key="summary" className="p-5 rounded-lg bg-card border border-border space-y-4">
-                    <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🧠 Estratégia Inicial</h2>
-                    <RichTextEditor value={form.strategy} onChange={(val) => update("strategy", val)} placeholder="Descreva a estratégia inicial do aluno com formatação..." />
+                  <div key="summary" className="p-5 rounded-lg bg-card border border-border">
+                    <div className="flex items-center justify-between cursor-pointer -m-5 p-5" onClick={() => setIsSummaryCollapsed(!isSummaryCollapsed)}>
+                      <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🧠 Estratégia Inicial</h2>
+                      <button type="button" className="p-1 hover:bg-secondary rounded-md text-muted-foreground">
+                        {!isSummaryCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <AnimatePresence>
+                      {!isSummaryCollapsed && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden pt-4 mt-1">
+                          <RichTextEditor value={form.strategy} onChange={(val) => update("strategy", val)} placeholder="Descreva a estratégia inicial do aluno com formatação..." />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               case "steps":
                 return (
-                  <div key="steps" className="p-5 rounded-lg bg-card border border-border space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div key="steps" className="p-5 rounded-lg bg-card border border-border">
+                    <div className="flex items-center justify-between cursor-pointer -m-5 p-5 mb-0" onClick={() => setIsStepsCollapsed(!isStepsCollapsed)}>
                       <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">📋 Próximos Passos</h2>
-                      <div className="flex items-center gap-4">
+                      <button type="button" className="p-1 hover:bg-secondary rounded-md text-muted-foreground">
+                        {!isStepsCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <AnimatePresence>
+                    {!isStepsCollapsed && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-4 pt-4 mt-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <span className="sr-only">Próximos Passos</span>
+                      <div className="flex items-center gap-4 ml-auto">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input type="checkbox" checked={form.hideStepsTitle} onChange={(e) => update("hideStepsTitle", e.target.checked)} className="w-4 h-4 accent-gold" />
                           <span className="text-xs text-muted-foreground">Ocultar Títulos dos Subitens</span>
@@ -749,6 +925,9 @@ const CreatePage = () => {
                       </Droppable>
                     </DragDropContext>
                     {form.steps.length === 0 && <p className="text-xs text-muted-foreground mt-4">Nenhum passo adicionado.</p>}
+                    </motion.div>
+                    )}
+                    </AnimatePresence>
                   </div>
                 );
               case "optionalBlocks":
@@ -782,7 +961,7 @@ const CreatePage = () => {
                               className="flex items-center justify-between cursor-pointer group"
                               onClick={() => setIsStandardBlocksCollapsed(!isStandardBlocksCollapsed)}
                             >
-                              <h3 className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">Blocos Padrões (Apps e Credenciais)</h3>
+                              <h3 className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">Botões Padrões (Bioimpedância, Plano, Treino, Check-ins, Psicóloga, Membros)</h3>
                               <button
                                 type="button"
                                 className="p-1 hover:bg-background rounded-md transition-colors text-muted-foreground focus:outline-none"
@@ -797,27 +976,19 @@ const CreatePage = () => {
                                   initial={{ height: 0, opacity: 0 }}
                                   animate={{ height: "auto", opacity: 1 }}
                                   exit={{ height: 0, opacity: 0 }}
-                                  className="space-y-3 overflow-hidden"
+                                  className="overflow-hidden"
                                 >
-                                  {[
-                                    { key: "hasTreino", label: "Treino" },
-                                    { key: "hasPsicologa", label: "Psicóloga" },
-                                    { key: "hasBioimpedancia", label: "Bioimpedância" },
-                                    { key: "hasAreaMembros", label: "Área de Membros" },
-                                    { key: "hasApps", label: "Apps (WebDiet / MFit)" },
-                                  ].map(({ key, label }) => (
-                                    <label key={key} className="flex items-center justify-between p-3 rounded-md bg-background cursor-pointer border border-border">
-                                      <span className="text-sm text-foreground">{label}</span>
-                                      <input type="checkbox" checked={(form as any)[key]} onChange={(e) => update(key as any, e.target.checked)} className="w-5 h-5 rounded accent-gold" />
-                                    </label>
-                                  ))}
+                                  <StandardBlocksEditor
+                                    value={form.standardBlocks}
+                                    onChange={(next) => update("standardBlocks", next)}
+                                  />
                                 </motion.div>
                               )}
                             </AnimatePresence>
                           </div>
 
                           <div className="pt-2 border-t border-border mt-6">
-                            <h3 className="text-xs text-muted-foreground font-medium mb-4">Blocos 100% Customizados</h3>
+                            <h3 className="text-xs text-muted-foreground font-medium mb-4">Blocos 100% Customizados (opcional)</h3>
                             <SortableCustomBlocks
                               blocks={form.optionalBlocks as any}
                               collapsedState={form.collapsedOptionalBlocks}
@@ -832,64 +1003,51 @@ const CreatePage = () => {
                 );
               case "links":
                 return (
-                  <div key="links" className="p-5 rounded-lg bg-card border border-border space-y-4">
-                    <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🔗 Links</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-muted-foreground font-medium">Área de Membros</label>
-                        <input value={form.membersLink} onChange={(e) => update("membersLink", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="https://..." />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground font-medium">WhatsApp Suporte</label>
-                        <input value={form.whatsappUrl} onChange={(e) => update("whatsappUrl", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="https://wa.me/..." />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-4">
-                      <h3 className="text-xs text-muted-foreground font-medium">Links Adicionais</h3>
-                      <button onClick={addLink} className="flex items-center gap-1 text-xs text-gold hover:text-gold-dark transition-colors">
-                        <Plus className="w-3 h-3" /> Adicionar
+                  <div key="links" className="p-5 rounded-lg bg-card border border-border">
+                    <div className="flex items-center justify-between cursor-pointer -m-5 p-5" onClick={() => setIsLinksCollapsed(!isLinksCollapsed)}>
+                      <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🔗 Links</h2>
+                      <button type="button" className="p-1 hover:bg-secondary rounded-md text-muted-foreground">
+                        {!isLinksCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                       </button>
                     </div>
-                    {form.links.map((link, i) => (
-                      <div key={i} className="flex gap-2">
-                        <div className="flex-1 grid grid-cols-2 gap-2">
-                          <input value={link.label} onChange={(e) => updateLink(i, "label", e.target.value)} className="px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Nome do link" />
-                          <input value={link.url} onChange={(e) => updateLink(i, "url", e.target.value)} className="px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="URL" />
-                        </div>
-                        <button onClick={() => removeLink(i)} className="p-2 text-muted-foreground hover:text-destructive">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                    <AnimatePresence>
+                      {!isLinksCollapsed && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-4 pt-4 mt-1">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs text-muted-foreground font-medium">Área de Membros</label>
+                              <input value={form.membersLink} onChange={(e) => update("membersLink", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="https://..." />
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground font-medium">WhatsApp Suporte</label>
+                              <input value={form.whatsappUrl} onChange={(e) => update("whatsappUrl", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="https://wa.me/..." />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-4">
+                            <h3 className="text-xs text-muted-foreground font-medium">Links Adicionais</h3>
+                            <button onClick={addLink} className="flex items-center gap-1 text-xs text-gold hover:text-gold-dark transition-colors">
+                              <Plus className="w-3 h-3" /> Adicionar
+                            </button>
+                          </div>
+                          {form.links.map((link, i) => (
+                            <div key={i} className="flex gap-2">
+                              <div className="flex-1 grid grid-cols-2 gap-2">
+                                <input value={link.label} onChange={(e) => updateLink(i, "label", e.target.value)} className="px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Nome do link" />
+                                <input value={link.url} onChange={(e) => updateLink(i, "url", e.target.value)} className="px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="URL" />
+                              </div>
+                              <button onClick={() => removeLink(i)} className="p-2 text-muted-foreground hover:text-destructive">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
-              case "credentials":
-                return form.hasApps ? (
-                  <div key="credentials" className="p-5 rounded-lg bg-card border border-border space-y-4">
-                    <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🔐 Credenciais dos Apps</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-muted-foreground font-medium">WebDiet Login</label>
-                        <input value={form.webdietLogin} onChange={(e) => update("webdietLogin", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground font-medium">WebDiet Senha</label>
-                        <input value={form.webdietPassword} onChange={(e) => update("webdietPassword", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-muted-foreground font-medium">MFit Login</label>
-                        <input value={form.mfitLogin} onChange={(e) => update("mfitLogin", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground font-medium">MFit Senha</label>
-                        <input value={form.mfitPassword} onChange={(e) => update("mfitPassword", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" />
-                      </div>
-                    </div>
-                  </div>
-                ) : null;
+              case "standardButtons":
+                return null;
               case "guidelines":
                 return (
                   <div key="guidelines" className="p-5 rounded-lg bg-card border border-border">
@@ -916,8 +1074,12 @@ const CreatePage = () => {
                           exit={{ height: 0, opacity: 0 }}
                           className="space-y-4 overflow-hidden pt-4 mt-6 border-t border-border"
                         >
-                          <div>
+                          <div className="space-y-2">
                             <input value={form.guidelinesTitle} onChange={(e) => update("guidelinesTitle", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground font-semibold" placeholder="Título da Seção (ex: 📌 Orientações Importantes)" />
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" checked={form.hideGuidelinesTitle} onChange={(e) => update("hideGuidelinesTitle", e.target.checked)} className="w-4 h-4 accent-gold" />
+                              <span className="text-xs text-muted-foreground">Ocultar título da seção (mostra só os destaques)</span>
+                            </label>
                           </div>
                           <RichTextEditor value={form.guidelinesContent} onChange={(val) => update("guidelinesContent", val)} placeholder="Orientações detalhadas com suporte a formatação..." />
                     <div className="flex items-center justify-between mt-4">
@@ -1012,32 +1174,45 @@ const CreatePage = () => {
                   </div>
                 );
               case "support":
-                return (
-                  <div key="support" className="p-5 rounded-lg bg-card border border-border space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">❓ Dúvidas Frequentes</h2>
-                      <button onClick={addFaq} className="flex items-center gap-1 text-xs text-gold hover:text-gold-dark transition-colors">
-                        <Plus className="w-3 h-3" /> Adicionar
-                      </button>
-                    </div>
-                    {form.faqs.map((faq, i) => (
-                      <div key={i} className="flex gap-2">
-                        <div className="flex-1 space-y-2">
-                          <input value={faq.question} onChange={(e) => updateFaq(i, "question", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Pergunta" />
-                          <input value={faq.answer} onChange={(e) => updateFaq(i, "answer", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Resposta" />
-                        </div>
-                        <button onClick={() => removeFaq(i)} className="p-2 text-muted-foreground hover:text-destructive self-start">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                    {form.faqs.length === 0 && <p className="text-xs text-muted-foreground">Nenhuma FAQ adicionada.</p>}
-                  </div>
-                );
+                return null;
               default:
                 return null;
             }
           })}
+
+          {/* Imagem Extras (rodapé) */}
+          <div className="p-5 rounded-lg bg-card border border-border">
+            <div className="flex items-center justify-between cursor-pointer -m-5 p-5" onClick={() => setIsExtrasCollapsed(!isExtrasCollapsed)}>
+              <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🖼️ Imagem Final (Extras)</h2>
+              <button type="button" className="p-1 hover:bg-secondary rounded-md text-muted-foreground">
+                {!isExtrasCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+            </div>
+            <AnimatePresence>
+              {!isExtrasCollapsed && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-4 pt-4 mt-1">
+                  <p className="text-xs text-muted-foreground">Imagem fixa que aparece no rodapé da página do aluno, sem título nem card. Deixe vazio para não exibir.</p>
+                  {form.extrasImageUrl && (
+                    <div className="relative w-full max-w-md rounded-lg overflow-hidden border border-border">
+                      <img src={form.extrasImageUrl} alt="Imagem extras" className="w-full h-48 object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => update("extrasImageUrl", "")}
+                        className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 rounded-full text-white"
+                        title="Remover"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  <ImageUpload
+                    label={form.extrasImageUrl ? "Trocar Imagem" : "Adicionar Imagem"}
+                    onUpload={(url) => update("extrasImageUrl", url)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Ordenação */}
           <div className="p-5 rounded-lg bg-card border border-border">

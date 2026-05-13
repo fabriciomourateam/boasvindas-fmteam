@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Plus, Edit2, Trash2, Copy, ArrowLeft, LayoutTemplate } from "lucide-react";
 import { toast } from "sonner";
@@ -51,21 +51,21 @@ const TemplatesPage = () => {
             <header className="gradient-dark px-4 sm:px-8 py-6">
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => navigate("/admin")} className="text-white/60 hover:text-white transition-colors">
+                        <Link to="/admin" className="text-white/60 hover:text-white transition-colors">
                             <ArrowLeft className="w-5 h-5" />
-                        </button>
+                        </Link>
                         <div>
                             <span className="font-display text-2xl gradient-gold-text">FM</span>
                             <span className="text-white font-display text-lg ml-1">TEMPLATES</span>
                         </div>
                     </div>
-                    <button
-                        onClick={() => navigate("/admin/templates/criar")}
+                    <Link
+                        to="/admin/templates/criar"
                         className="flex items-center gap-2 px-4 py-2.5 rounded-lg gradient-gold text-primary-foreground font-semibold text-sm hover:shadow-gold transition-all"
                     >
                         <Plus className="w-4 h-4" />
                         <span className="hidden sm:inline">Novo Template</span>
-                    </button>
+                    </Link>
                 </div>
             </header>
 
@@ -143,13 +143,13 @@ const TemplatesPage = () => {
                                     )}
 
                                     <div className="flex items-center gap-1 border-t border-border pt-3 mt-3">
-                                        <button
-                                            onClick={() => navigate(`/admin/templates/${template.id}/editar`)}
+                                        <Link
+                                            to={`/admin/templates/${template.id}/editar`}
                                             className="p-2 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
                                             title="Editar"
                                         >
                                             <Edit2 className="w-4 h-4" />
-                                        </button>
+                                        </Link>
                                         <button
                                             onClick={() => handleDuplicate(template)}
                                             className="p-2 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
