@@ -122,14 +122,17 @@ const StudentPage = () => {
         return optionalBlocks.length > 0 ? <OptionalBlocks key="optionalBlocks" blocks={optionalBlocks} /> : null;
       case "standardButtons":
         return <StandardBlocksGrid key="standardButtons" data={standardBlocks} order={standardBlocksOrder} />;
-      case "support":
+      case "support": {
+        const whatsapp = cc.whatsappUrl || page.support_link;
+        if (!whatsapp) return null;
         return (
           <SupportSection
             key="support"
-            whatsappUrl={cc.whatsappUrl || page.support_link || undefined}
+            whatsappUrl={whatsapp || undefined}
             supportHours={cc.supportHours || undefined}
           />
         );
+      }
       default:
         return null;
     }

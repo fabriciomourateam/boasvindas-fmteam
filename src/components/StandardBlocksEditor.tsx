@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { ChevronDown, ChevronRight, Trash2, Activity, Utensils, Dumbbell, Target, Brain, BookOpen, GripVertical } from "lucide-react";
 import ImageUpload from "./ImageUpload";
+import RichTextEditor from "./RichTextEditor";
 import type { StandardBlocksData, StandardBlock, AreaMembrosBlock, StandardBlockKey } from "@/pages/CreatePage";
 
 const META: Record<StandardBlockKey, { label: string; icon: React.ReactNode; helper: string }> = {
@@ -148,13 +149,11 @@ const StandardBlocksEditor = ({ value, onChange, order, onOrderChange }: Props) 
 
                               {KEYS_WITH_DESCRIPTION.includes(key) && (
                                 <div>
-                                  <label className="text-xs text-muted-foreground font-medium">Texto explicativo (aparece no modal)</label>
-                                  <textarea
+                                  <label className="text-xs text-muted-foreground font-medium mb-1 block">Texto explicativo (aparece no modal)</label>
+                                  <RichTextEditor
                                     value={(block as any).description || ""}
-                                    onChange={(e) => updateBlock(key, { description: e.target.value })}
-                                    className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground resize-y"
+                                    onChange={(val) => updateBlock(key, { description: val })}
                                     placeholder={key === "areaMembros" ? "Ex: Acesse os módulos e materiais complementares." : "Ex: Instruções de uso, observações, etc."}
-                                    rows={3}
                                   />
                                 </div>
                               )}

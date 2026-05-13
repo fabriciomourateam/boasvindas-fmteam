@@ -129,7 +129,10 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
                   </div>
                 )}
                 {(activeBlock as any).description && (
-                  <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{(activeBlock as any).description}</div>
+                  <div
+                    className="text-sm text-foreground leading-relaxed quill-content"
+                    dangerouslySetInnerHTML={{ __html: (activeBlock as any).description }}
+                  />
                 )}
                 {((activeBlock as any).login || (activeBlock as any).password) && (
                   <CredentialsList login={(activeBlock as any).login} password={(activeBlock as any).password} />

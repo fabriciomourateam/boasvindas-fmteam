@@ -21,7 +21,14 @@ export const SECTION_LABELS: Record<string, string> = {
     support: "Área de Suporte (WhatsApp)",
 };
 
-/** Normaliza sectionOrder: insere seções faltantes na posição default e remove obsoletas (ex: 'credentials' legado). */
+/**
+ * Normaliza sectionOrder:
+ *  - Remove valores inválidos (ex: 'credentials' legado)
+ *  - Se o array estiver vazio/ausente, devolve o default completo
+ *  - Caso contrário, respeita a escolha do usuário e SÓ insere automaticamente 'standardButtons'
+ *    (seção nova que foi adicionada depois — alunos/templates antigos não tinham). As demais
+ *    seções, se o usuário tiver removido, ficam removidas.
+ */
 export function normalizeSectionOrder(raw: any): string[] {
     const valid = new Set(DEFAULT_SECTION_ORDER);
     const seen = new Set<string>();
@@ -34,18 +41,19 @@ export function normalizeSectionOrder(raw: any): string[] {
             return true;
         })
         : [];
-    // Para cada seção do default que está faltando, inserir na sua posição default
-    DEFAULT_SECTION_ORDER.forEach((s, defaultIdx) => {
-        if (filtered.includes(s)) return;
-        // Acha posição: antes da próxima seção que JÁ está no filtered
+    if (filtered.length === 0) return [...DEFAULT_SECTION_ORDER];
+    // Auto-insere apenas 'standardButtons' (seção nova). Posição: antes da próxima seção
+    // que já está no filtered (segundo a ordem default).
+    if (!filtered.includes("standardButtons")) {
+        const defaultIdx = DEFAULT_SECTION_ORDER.indexOf("standardButtons");
         let insertAt = filtered.length;
         for (let i = defaultIdx + 1; i < DEFAULT_SECTION_ORDER.length; i++) {
             const next = DEFAULT_SECTION_ORDER[i];
             const idx = filtered.indexOf(next);
             if (idx >= 0) { insertAt = idx; break; }
         }
-        filtered.splice(insertAt, 0, s);
-    });
+        filtered.splice(insertAt, 0, "standardButtons");
+    }
     return filtered;
 }
 

@@ -126,14 +126,17 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
                 return optionalBlocks.length > 0 ? <OptionalBlocks key="optionalBlocks" blocks={optionalBlocks} /> : null;
             case "standardButtons":
                 return <StandardBlocksGrid key="standardButtons" data={standardBlocks} order={standardBlocksOrder} />;
-            case "support":
+            case "support": {
+                const wa = whatsappUrl || supportLink;
+                if (!wa) return null;
                 return (
                     <SupportSection
                         key="support"
-                        whatsappUrl={whatsappUrl || supportLink || undefined}
+                        whatsappUrl={wa || undefined}
                         supportHours={supportHours || undefined}
                     />
                 );
+            }
             default:
                 return null;
         }
