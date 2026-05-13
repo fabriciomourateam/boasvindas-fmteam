@@ -25,22 +25,46 @@ interface Props {
   onChange: (next: StandardBlocksData) => void;
   order: StandardBlockKey[];
   onOrderChange: (next: StandardBlockKey[]) => void;
+  /** Controlado: array de keys abertas. Se undefined/null, faz fallback pra "abre os enabled". */
+  openKeys?: string[] | null;
+  onOpenKeysChange?: (next: StandardBlockKey[]) => void;
 }
 
-const StandardBlocksEditor = ({ value, onChange, order, onOrderChange }: Props) => {
-  // Por padrão, abre automaticamente os que estão ativos
-  const [openKeys, setOpenKeys] = useState<Set<StandardBlockKey>>(() => {
+const StandardBlocksEditor = ({ value, onChange, order, onOrderChange, openKeys, onOpenKeysChange }: Props) => {
+  // Estado fallback caso parent não controle (ex: tela legada)
+  const [localOpen, setLocalOpen] = useState<Set<StandardBlockKey>>(() => {
     const set = new Set<StandardBlockKey>();
     order.forEach((k) => { if (value[k]?.enabled) set.add(k); });
     return set;
   });
 
-  const isOpen = (k: StandardBlockKey) => openKeys.has(k);
+  // Source-of-truth: prop openKeys (se passada) ou fallback. Se openKeys é null/undefined,
+  // calcula "todos enabled" como inicial e usa esse computed; assim que o user mexer, persiste.
+  const effective: Set<StandardBlockKey> = (() => {
+    if (Array.isArray(openKeys)) return new Set(openKeys as StandardBlockKey[]);
+    if (onOpenKeysChange) {
+      // Controlado mas ainda não inicializado: auto-abre os enabled
+      const auto = new Set<StandardBlockKey>();
+      order.forEach((k) => { if (value[k]?.enabled) auto.add(k); });
+      return auto;
+    }
+    return localOpen;
+  })();
+
+  const isOpen = (k: StandardBlockKey) => effective.has(k);
+
+  const persistOpen = (next: Set<StandardBlockKey>) => {
+    if (onOpenKeysChange) {
+      onOpenKeysChange(Array.from(next));
+    } else {
+      setLocalOpen(next);
+    }
+  };
 
   const toggleOpen = (k: StandardBlockKey) => {
-    const next = new Set(openKeys);
+    const next = new Set(effective);
     if (next.has(k)) next.delete(k); else next.add(k);
-    setOpenKeys(next);
+    persistOpen(next);
   };
 
   const updateBlock = (key: StandardBlockKey, patch: Partial<StandardBlock & AreaMembrosBlock>) => {
@@ -49,11 +73,10 @@ const StandardBlocksEditor = ({ value, onChange, order, onOrderChange }: Props) 
 
   const setEnabled = (key: StandardBlockKey, enabled: boolean) => {
     updateBlock(key, { enabled });
-    // Auto-expande ao ativar; auto-recolhe ao desativar (opcional)
-    if (enabled && !openKeys.has(key)) {
-      const next = new Set(openKeys);
+    if (enabled && !effective.has(key)) {
+      const next = new Set(effective);
       next.add(key);
-      setOpenKeys(next);
+      persistOpen(next);
     }
   };
 

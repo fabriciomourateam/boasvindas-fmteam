@@ -76,6 +76,7 @@ interface TemplateForm {
     collapsedOptionalBlocks: Record<number, boolean>;
     standardBlocks: StandardBlocksData;
     standardBlocksOrder: StandardBlockKey[];
+    standardBlocksOpen: StandardBlockKey[] | null;
     extrasImageUrl: string;
     editorCollapse: Record<string, boolean>;
 }
@@ -115,6 +116,7 @@ const defaultForm: TemplateForm = {
     collapsedOptionalBlocks: {},
     standardBlocks: mergeStandardBlocks(null, {}),
     standardBlocksOrder: DEFAULT_STANDARD_BLOCKS_ORDER,
+    standardBlocksOpen: null,
     extrasImageUrl: "",
     editorCollapse: {},
 };
@@ -201,6 +203,7 @@ const EditTemplate = () => {
                 }),
                 extrasImageUrl: content.extrasImageUrl || "",
                 editorCollapse: (content.editorCollapse && typeof content.editorCollapse === "object") ? content.editorCollapse : {},
+                standardBlocksOpen: Array.isArray(content.standardBlocksOpen) ? content.standardBlocksOpen : null,
             });
         }
     }, [existingTemplate, duplicateId]);
@@ -248,6 +251,7 @@ const EditTemplate = () => {
             standardBlocksOrder: form.standardBlocksOrder,
             extrasImageUrl: form.extrasImageUrl,
             editorCollapse: form.editorCollapse,
+            standardBlocksOpen: form.standardBlocksOpen,
         };
 
         const blocks: TemplateBlocks = {

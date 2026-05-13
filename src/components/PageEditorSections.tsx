@@ -43,6 +43,7 @@ export interface SharedFormShape {
   extrasImageUrl: string;
   sectionOrder: string[];
   editorCollapse: Record<string, boolean>;
+  standardBlocksOpen?: string[] | null;
 }
 
 interface Props {
@@ -276,6 +277,8 @@ const PageEditorSections = ({ form, update }: Props) => {
                     onChange={(next) => update("standardBlocks", next)}
                     order={form.standardBlocksOrder}
                     onOrderChange={(next) => update("standardBlocksOrder", next)}
+                    openKeys={form.standardBlocksOpen}
+                    onOpenKeysChange={(next) => update("standardBlocksOpen", next)}
                   />
                 </motion.div>
               )}

@@ -44,6 +44,7 @@ export interface TemplateContent {
     standardBlocksOrder?: any;
     extrasImageUrl?: string;
     editorCollapse?: Record<string, boolean>;
+    standardBlocksOpen?: string[] | null;
 }
 
 export interface TemplateBlocks {

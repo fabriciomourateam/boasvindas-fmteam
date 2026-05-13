@@ -156,6 +156,7 @@ interface FormState {
   hasApps: boolean;
   standardBlocks: StandardBlocksData;
   standardBlocksOrder: StandardBlockKey[];
+  standardBlocksOpen: StandardBlockKey[] | null;
   extrasImageUrl: string;
   editorCollapse: Record<string, boolean>;
   membersLink: string;
@@ -213,6 +214,7 @@ const defaultForm: FormState = {
   hasApps: true,
   standardBlocks: emptyStandardBlocks,
   standardBlocksOrder: DEFAULT_STANDARD_BLOCKS_ORDER,
+  standardBlocksOpen: null,
   extrasImageUrl: "",
   editorCollapse: {},
   membersLink: "",
@@ -340,6 +342,7 @@ const CreatePage = () => {
         }),
         extrasImageUrl: cc.extrasImageUrl || "",
         editorCollapse: (cc.editorCollapse && typeof cc.editorCollapse === "object") ? cc.editorCollapse : {},
+        standardBlocksOpen: Array.isArray(cc.standardBlocksOpen) ? cc.standardBlocksOpen : null,
       });
     }
   }, [isEditing, existingPage]);
@@ -410,6 +413,7 @@ const CreatePage = () => {
       }),
       extrasImageUrl: content.extrasImageUrl ?? prev.extrasImageUrl,
       editorCollapse: (content.editorCollapse && typeof content.editorCollapse === "object") ? content.editorCollapse : prev.editorCollapse,
+      standardBlocksOpen: Array.isArray(content.standardBlocksOpen) ? content.standardBlocksOpen : prev.standardBlocksOpen,
     }));
 
     toast.success("Template aplicado!");
@@ -442,6 +446,7 @@ const CreatePage = () => {
       standardBlocksOrder: form.standardBlocksOrder,
       extrasImageUrl: form.extrasImageUrl,
       editorCollapse: form.editorCollapse,
+      standardBlocksOpen: form.standardBlocksOpen,
     } as Json;
   };
 
@@ -538,6 +543,7 @@ const CreatePage = () => {
       standardBlocksOrder: form.standardBlocksOrder,
       extrasImageUrl: form.extrasImageUrl,
       editorCollapse: form.editorCollapse,
+      standardBlocksOpen: form.standardBlocksOpen,
     };
 
     const blocks: TemplateBlocks = {
