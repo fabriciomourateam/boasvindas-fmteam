@@ -14,6 +14,7 @@ export interface CustomBlock {
     link2?: string;
     linkLabel2?: string;
     imageUrl?: string;
+    centerContent?: boolean;
 }
 
 interface SortableCustomBlocksProps {
@@ -191,6 +192,15 @@ const SortableCustomBlocks = ({ blocks, collapsedState, onChange, onCollapseChan
                                                             <div className="mt-2">
                                                                 <ImageUpload onUpload={(url) => updateBlock(i, "imageUrl", url)} label={block.imageUrl ? "Trocar Imagem" : "Adicionar Imagem de Capa"} />
                                                             </div>
+                                                            <label className="flex items-center gap-2 cursor-pointer mt-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={block.centerContent || false}
+                                                                    onChange={(e) => onChange(blocks.map((b, idx) => idx === i ? { ...b, centerContent: e.target.checked } : b))}
+                                                                    className="w-4 h-4 accent-gold"
+                                                                />
+                                                                <span className="text-xs text-muted-foreground">Centralizar conteúdo na página do aluno</span>
+                                                            </label>
                                                         </div>
                                                     </motion.div>
                                                 )}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Activity, Utensils, Dumbbell, Target, Brain, BookOpen, Copy, Eye, EyeOff } from "lucide-react";
+import { Activity, Utensils, Dumbbell, Target, Brain, BookOpen, Copy, Eye, EyeOff, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
 import type { StandardBlocksData, StandardBlockKey } from "@/pages/CreatePage";
 import { DEFAULT_STANDARD_BLOCKS_ORDER } from "@/pages/CreatePage";
@@ -66,47 +66,65 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
   const activeBlock = openKey ? data[openKey] : null;
   const activeMeta = openKey ? META[openKey] : null;
 
+  const isOdd = visibleKeys.length % 2 === 1;
+
   return (
-    <section className="px-4 sm:px-8 py-12 bg-gradient-to-b from-secondary/30 via-background to-secondary/30">
+    <section className="px-4 sm:px-8 py-12 bg-gradient-to-b from-secondary/40 via-background to-secondary/40">
       <div className="max-w-lg mx-auto">
-        {/* Flex-wrap garante que linha incompleta fique centralizada automaticamente */}
-        <div className="flex flex-wrap justify-center gap-4 sm:gap-5">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {visibleKeys.map((key, i) => {
             const meta = META[key];
+            const isLastOdd = isOdd && i === visibleKeys.length - 1;
             return (
               <motion.button
                 key={key}
                 type="button"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.07, duration: 0.5, ease: "easeOut" }}
-                whileHover={{ y: -4, scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ y: -5, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => setOpenKey(key)}
-                style={{ width: "calc((100% - 2rem) / 3)" }}
-                className={`group relative overflow-hidden rounded-full aspect-square ${meta.glow} hover:shadow-[0_22px_60px_-12px_rgba(0,0,0,0.5)] transition-shadow duration-300`}
+                className={`group relative overflow-hidden rounded-2xl ${isLastOdd ? "col-span-2 aspect-[2/1]" : "aspect-[4/3]"} ${meta.glow} hover:shadow-[0_22px_60px_-12px_rgba(0,0,0,0.55)] transition-shadow duration-300`}
               >
-                {/* Gradient base */}
+                {/* Camada 1: gradient base */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${meta.gradient}`} />
-                {/* Radial highlight pra dar profundidade esférica */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.35),transparent_55%)]" />
-                {/* Sombra interna na borda inferior */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_85%,rgba(0,0,0,0.3),transparent_55%)]" />
+                {/* Camada 2: radial highlight no canto sup-esq */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.3),transparent_60%)]" />
+                {/* Camada 3: sombra interna canto inf-dir */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(0,0,0,0.35),transparent_55%)]" />
+                {/* Camada 4: pattern/grain sutil */}
+                <div className="absolute inset-0 opacity-[0.08] mix-blend-overlay" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
                 {/* Shine sweep no hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-full">
-                  <div className="absolute -left-1/2 top-0 h-full w-1/2 bg-gradient-to-r from-transparent via-white/35 to-transparent skew-x-12 group-hover:translate-x-[300%] transition-transform duration-1000 ease-out" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-2xl">
+                  <div className="absolute -left-1/2 top-0 h-full w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 group-hover:translate-x-[400%] transition-transform duration-1000 ease-out" />
                 </div>
-                {/* Ring sutil */}
-                <div className="absolute inset-0 rounded-full ring-1 ring-white/30" />
+                {/* Borda dupla pra dar profundidade */}
+                <div className="absolute inset-0 rounded-2xl ring-1 ring-white/30" />
+                <div className="absolute inset-[3px] rounded-[14px] ring-1 ring-white/10" />
 
                 {/* Conteúdo */}
-                <div className="relative h-full flex flex-col items-center justify-center gap-1.5 px-2 text-white">
-                  <div className="drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)]">{meta.icon}</div>
-                  <div className="font-display text-[11px] sm:text-xs leading-tight text-center tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] px-1">
+                <div className="relative h-full flex flex-col items-center justify-center gap-3 px-4 py-4 text-white">
+                  <div className="drop-shadow-[0_6px_16px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform duration-300">
+                    {meta.iconLg}
+                  </div>
+                  <div className="font-display text-sm sm:text-base leading-tight text-center tracking-wider uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
                     {meta.label}
                   </div>
                 </div>
+
+                {/* Indicador "ver mais" no canto inf-dir */}
+                <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 translate-x-2">
+                  <span className="text-[10px] font-medium text-white/90 uppercase tracking-widest">Ver</span>
+                  <div className="w-6 h-6 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center ring-1 ring-white/30">
+                    <ArrowUpRight className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                  </div>
+                </div>
+
+                {/* Linha decorativa fina no canto sup-dir */}
+                <div className="absolute top-3 right-3 w-8 h-px bg-gradient-to-r from-white/50 to-transparent" />
+                <div className="absolute top-3 right-3 w-px h-6 bg-gradient-to-b from-white/50 to-transparent" />
               </motion.button>
             );
           })}
