@@ -191,7 +191,7 @@ const defaultForm: FormState = {
   mfitPassword: "",
   notes: "",
   strategy: "",
-  duration: "",
+  duration: "12 meses",
   whatsappUrl: "",
   supportHours: "",
   steps: [],
