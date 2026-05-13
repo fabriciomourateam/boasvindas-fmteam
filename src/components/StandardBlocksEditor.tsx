@@ -27,10 +27,33 @@ interface Props {
 }
 
 const StandardBlocksEditor = ({ value, onChange, order, onOrderChange }: Props) => {
-  const [openKey, setOpenKey] = useState<StandardBlockKey | null>(null);
+  // Por padrão, abre automaticamente os que estão ativos
+  const [openKeys, setOpenKeys] = useState<Set<StandardBlockKey>>(() => {
+    const set = new Set<StandardBlockKey>();
+    order.forEach((k) => { if (value[k]?.enabled) set.add(k); });
+    return set;
+  });
+
+  const isOpen = (k: StandardBlockKey) => openKeys.has(k);
+
+  const toggleOpen = (k: StandardBlockKey) => {
+    const next = new Set(openKeys);
+    if (next.has(k)) next.delete(k); else next.add(k);
+    setOpenKeys(next);
+  };
 
   const updateBlock = (key: StandardBlockKey, patch: Partial<StandardBlock & AreaMembrosBlock>) => {
     onChange({ ...value, [key]: { ...value[key], ...patch } });
+  };
+
+  const setEnabled = (key: StandardBlockKey, enabled: boolean) => {
+    updateBlock(key, { enabled });
+    // Auto-expande ao ativar; auto-recolhe ao desativar (opcional)
+    if (enabled && !openKeys.has(key)) {
+      const next = new Set(openKeys);
+      next.add(key);
+      setOpenKeys(next);
+    }
   };
 
   const handleDragEnd = (result: DropResult) => {
@@ -50,7 +73,7 @@ const StandardBlocksEditor = ({ value, onChange, order, onOrderChange }: Props) 
             {order.map((key, index) => {
               const block = value[key];
               const meta = META[key];
-              const isOpen = openKey === key;
+              const open = isOpen(key);
               return (
                 <Draggable key={key} draggableId={key} index={index}>
                   {(prov, snapshot) => (
@@ -59,36 +82,39 @@ const StandardBlocksEditor = ({ value, onChange, order, onOrderChange }: Props) 
                       {...prov.draggableProps}
                       className={`rounded-lg border transition-colors ${snapshot.isDragging ? "bg-secondary border-gold shadow-gold ring-1 ring-gold/50" : block.enabled ? "border-gold/30 bg-card" : "border-border bg-background"}`}
                     >
-                      <div className="flex items-center gap-2 p-3">
-                        <div {...prov.dragHandleProps} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-gold p-1 -ml-1" title="Arrastar para reordenar">
+                      <div
+                        className="flex items-center gap-2 p-3 cursor-pointer hover:bg-secondary/30 rounded-t-lg"
+                        onClick={() => toggleOpen(key)}
+                      >
+                        <div
+                          {...prov.dragHandleProps}
+                          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-gold p-1 -ml-1"
+                          title="Arrastar para reordenar"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <GripVertical className="w-4 h-4" />
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setOpenKey(isOpen ? null : key)}
-                          className="p-1 hover:bg-secondary rounded-md text-muted-foreground"
-                          title={isOpen ? "Recolher" : "Expandir"}
-                        >
-                          {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        </button>
+                        <div className="p-1 text-muted-foreground">
+                          {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </div>
                         <div className="text-gold">{meta.icon}</div>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-foreground truncate">{meta.label}</div>
-                          {!isOpen && <div className="text-xs text-muted-foreground truncate">{meta.helper}</div>}
+                          {!open && <div className="text-xs text-muted-foreground truncate">{meta.helper}</div>}
                         </div>
-                        <label className="flex items-center gap-2 cursor-pointer shrink-0">
+                        <label className="flex items-center gap-2 cursor-pointer shrink-0" onClick={(e) => e.stopPropagation()}>
                           <span className="text-xs text-muted-foreground">{block.enabled ? "Ativo" : "Oculto"}</span>
                           <input
                             type="checkbox"
                             checked={block.enabled}
-                            onChange={(e) => updateBlock(key, { enabled: e.target.checked })}
+                            onChange={(e) => setEnabled(key, e.target.checked)}
                             className="w-5 h-5 rounded accent-gold"
                           />
                         </label>
                       </div>
 
                       <AnimatePresence initial={false}>
-                        {isOpen && (
+                        {open && (
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}

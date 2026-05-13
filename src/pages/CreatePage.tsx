@@ -976,7 +976,7 @@ const CreatePage = () => {
                       onClick={() => setIsOptionalBlocksCollapsed(!isOptionalBlocksCollapsed)}
                     >
                       <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">
-                        Blocos Opcionais
+                        🧩 Blocos Customizados
                       </h2>
                       <button
                         type="button"
@@ -992,50 +992,15 @@ const CreatePage = () => {
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          className="space-y-6 overflow-hidden mt-4 pt-4 border-t border-border"
+                          className="overflow-hidden mt-4 pt-4 border-t border-border"
                         >
-                          <div className="space-y-3">
-                            <div
-                              className="flex items-center justify-between cursor-pointer group"
-                              onClick={() => setIsStandardBlocksCollapsed(!isStandardBlocksCollapsed)}
-                            >
-                              <h3 className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">Botões Padrões (Bioimpedância, Plano, Treino, Check-ins, Psicóloga, Membros)</h3>
-                              <button
-                                type="button"
-                                className="p-1 hover:bg-background rounded-md transition-colors text-muted-foreground focus:outline-none"
-                              >
-                                {isStandardBlocksCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                              </button>
-                            </div>
-
-                            <AnimatePresence>
-                              {!isStandardBlocksCollapsed && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: "auto", opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  className="overflow-hidden"
-                                >
-                                  <StandardBlocksEditor
-                                    value={form.standardBlocks}
-                                    onChange={(next) => update("standardBlocks", next)}
-                                    order={form.standardBlocksOrder}
-                                    onOrderChange={(next) => update("standardBlocksOrder", next)}
-                                  />
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-
-                          <div className="pt-2 border-t border-border mt-6">
-                            <h3 className="text-xs text-muted-foreground font-medium mb-4">Blocos 100% Customizados (opcional)</h3>
-                            <SortableCustomBlocks
-                              blocks={form.optionalBlocks as any}
-                              collapsedState={form.collapsedOptionalBlocks}
-                              onChange={(blocks) => update("optionalBlocks", blocks)}
-                              onCollapseChange={(newState) => update("collapsedOptionalBlocks", newState)}
-                            />
-                          </div>
+                          <p className="text-xs text-muted-foreground mb-3">Blocos 100% personalizados (Extras, etc.) que aparecem como cards expandidos na página do aluno.</p>
+                          <SortableCustomBlocks
+                            blocks={form.optionalBlocks as any}
+                            collapsedState={form.collapsedOptionalBlocks}
+                            onChange={(blocks) => update("optionalBlocks", blocks)}
+                            onCollapseChange={(newState) => update("collapsedOptionalBlocks", newState)}
+                          />
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -1087,7 +1052,42 @@ const CreatePage = () => {
                   </div>
                 );
               case "standardButtons":
-                return null;
+                return (
+                  <div key="standardButtons" className="p-5 rounded-lg bg-card border border-border">
+                    <div
+                      className="flex items-center justify-between cursor-pointer -m-5 p-5"
+                      onClick={() => setIsStandardBlocksCollapsed(!isStandardBlocksCollapsed)}
+                    >
+                      <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">
+                        🎯 Botões Padrões
+                      </h2>
+                      <button
+                        type="button"
+                        className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
+                      >
+                        {!isStandardBlocksCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <AnimatePresence>
+                      {!isStandardBlocksCollapsed && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden mt-4 pt-4 border-t border-border"
+                        >
+                          <p className="text-xs text-muted-foreground mb-3">Cada botão aparece na página do aluno como card circular. Arraste para reordenar. Clique em uma linha pra configurar (foto, login/senha, links, texto).</p>
+                          <StandardBlocksEditor
+                            value={form.standardBlocks}
+                            onChange={(next) => update("standardBlocks", next)}
+                            order={form.standardBlocksOrder}
+                            onOrderChange={(next) => update("standardBlocksOrder", next)}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
               case "guidelines":
                 return (
                   <div key="guidelines" className="p-5 rounded-lg bg-card border border-border">
