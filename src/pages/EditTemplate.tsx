@@ -15,9 +15,16 @@ import type { TemplateContent, TemplateBlocks } from "@/hooks/useTemplates";
 import type { Json } from "@/integrations/supabase/types";
 import RichTextEditor from "@/components/RichTextEditor";
 import ImageUpload from "@/components/ImageUpload";
-import SortableSections, { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
+import SortableSections, { DEFAULT_SECTION_ORDER, normalizeSectionOrder } from "@/components/SortableSections";
 import SortableCustomBlocks from "@/components/SortableCustomBlocks";
 import LivePreviewModal from "@/components/LivePreviewModal";
+import StandardBlocksEditor from "@/components/StandardBlocksEditor";
+import {
+    mergeStandardBlocks,
+    normalizeStandardBlocksOrder,
+    DEFAULT_STANDARD_BLOCKS_ORDER,
+} from "@/pages/CreatePage";
+import type { StandardBlocksData, StandardBlockKey } from "@/pages/CreatePage";
 
 const objectives = [
     { value: "emagrecimento", label: "Emagrecimento" },
@@ -47,6 +54,7 @@ interface TemplateForm {
     stepsTitle: string;
     hideStepsTitle: boolean;
     guidelinesTitle: string;
+    hideGuidelinesTitle: boolean;
     hideHighlightsTitle: boolean;
     guidelinesContent: string;
     guidelinesHighlights: Array<{ title: string; content: string; hidden?: boolean }>;
@@ -69,6 +77,9 @@ interface TemplateForm {
     collapsedSteps: Record<number, boolean>;
     collapsedHighlights: Record<number, boolean>;
     collapsedOptionalBlocks: Record<number, boolean>;
+    standardBlocks: StandardBlocksData;
+    standardBlocksOrder: StandardBlockKey[];
+    extrasImageUrl: string;
 }
 
 const defaultForm: TemplateForm = {
@@ -93,6 +104,7 @@ const defaultForm: TemplateForm = {
     stepsTitle: "📋 PRÓXIMOS PASSOS",
     hideStepsTitle: false,
     guidelinesTitle: "📌 Orientações Importantes",
+    hideGuidelinesTitle: false,
     hideHighlightsTitle: false,
     guidelinesContent: "",
     guidelinesHighlights: [],
@@ -103,6 +115,9 @@ const defaultForm: TemplateForm = {
     collapsedSteps: {},
     collapsedHighlights: {},
     collapsedOptionalBlocks: {},
+    standardBlocks: mergeStandardBlocks(null, {}),
+    standardBlocksOrder: DEFAULT_STANDARD_BLOCKS_ORDER,
+    extrasImageUrl: "",
 };
 
 const EditTemplate = () => {
@@ -161,6 +176,7 @@ const EditTemplate = () => {
                 stepsTitle: content.stepsTitle || "📋 PRÓXIMOS PASSOS",
                 hideStepsTitle: content.hideStepsTitle ?? false,
                 guidelinesTitle: content.guidelines?.title || "📌 Orientações Importantes",
+                hideGuidelinesTitle: content.guidelines?.hideGuidelinesTitle ?? false,
                 hideHighlightsTitle: content.guidelines?.hideHighlightsTitle ?? false,
                 guidelinesContent: content.guidelines?.content || "",
                 guidelinesHighlights: (content.guidelines?.highlights || []).map((h: any) =>
@@ -169,10 +185,24 @@ const EditTemplate = () => {
                 faqs: content.faqs || [],
                 optionalBlocks: blocks.optionalBlocks || [],
                 links: content.links || [],
-                sectionOrder: content.sectionOrder || DEFAULT_SECTION_ORDER,
+                sectionOrder: normalizeSectionOrder(content.sectionOrder || DEFAULT_SECTION_ORDER),
                 collapsedSteps: content.collapsedSteps || {},
                 collapsedHighlights: content.collapsedHighlights || {},
                 collapsedOptionalBlocks: content.collapsedOptionalBlocks || {},
+                standardBlocksOrder: normalizeStandardBlocksOrder(content.standardBlocksOrder),
+                standardBlocks: mergeStandardBlocks(content.standardBlocks, {
+                    has_bioimpedancia: blocks.hasBioimpedancia,
+                    has_psicologa: blocks.hasPsicologa,
+                    has_apps: blocks.hasApps,
+                    has_treino: blocks.hasTreino,
+                    has_area_membros: blocks.hasAreaMembros,
+                    webdiet_login: content.credentials?.webdietLogin,
+                    webdiet_password: content.credentials?.webdietPassword,
+                    mfit_login: content.credentials?.mfitLogin,
+                    mfit_password: content.credentials?.mfitPassword,
+                    members_link: content.membersLink,
+                }),
+                extrasImageUrl: content.extrasImageUrl || "",
             });
         }
     }, [existingTemplate, duplicateId]);
@@ -186,6 +216,7 @@ const EditTemplate = () => {
             return;
         }
 
+        const sb = form.standardBlocks;
         const content: TemplateContent = {
             strategy: form.strategy,
             duration: form.duration,
@@ -194,6 +225,7 @@ const EditTemplate = () => {
             hideStepsTitle: form.hideStepsTitle,
             guidelines: {
                 title: form.guidelinesTitle,
+                hideGuidelinesTitle: form.hideGuidelinesTitle,
                 hideHighlightsTitle: form.hideHighlightsTitle,
                 content: form.guidelinesContent,
                 highlights: form.guidelinesHighlights,
@@ -201,12 +233,12 @@ const EditTemplate = () => {
             faqs: form.faqs,
             links: form.links,
             credentials: {
-                webdietLogin: form.webdietLogin,
-                webdietPassword: form.webdietPassword,
-                mfitLogin: form.mfitLogin,
-                mfitPassword: form.mfitPassword,
+                webdietLogin: sb.planoAlimentar.login || "",
+                webdietPassword: sb.planoAlimentar.password || "",
+                mfitLogin: sb.treino.login || "",
+                mfitPassword: sb.treino.password || "",
             },
-            membersLink: form.membersLink,
+            membersLink: sb.areaMembros.url || form.membersLink,
             supportHours: form.supportHours,
             whatsappUrl: form.whatsappUrl,
             notes: form.notes,
@@ -214,14 +246,17 @@ const EditTemplate = () => {
             collapsedSteps: form.collapsedSteps,
             collapsedHighlights: form.collapsedHighlights,
             collapsedOptionalBlocks: form.collapsedOptionalBlocks,
+            standardBlocks: form.standardBlocks,
+            standardBlocksOrder: form.standardBlocksOrder,
+            extrasImageUrl: form.extrasImageUrl,
         };
 
         const blocks: TemplateBlocks = {
-            hasTreino: form.hasTreino,
-            hasPsicologa: form.hasPsicologa,
-            hasBioimpedancia: form.hasBioimpedancia,
-            hasAreaMembros: form.hasAreaMembros,
-            hasApps: form.hasApps,
+            hasTreino: sb.treino.enabled,
+            hasPsicologa: sb.psicologa.enabled,
+            hasBioimpedancia: sb.bioimpedancia.enabled,
+            hasAreaMembros: sb.areaMembros.enabled,
+            hasApps: sb.planoAlimentar.enabled,
             optionalBlocks: form.optionalBlocks as any,
         };
 
@@ -537,7 +572,7 @@ const EditTemplate = () => {
                                             onClick={() => setIsOptionalBlocksCollapsed(!isOptionalBlocksCollapsed)}
                                         >
                                             <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">
-                                                Blocos Opcionais Padrão
+                                                🧩 Blocos Customizados
                                             </h2>
                                             <button
                                                 type="button"
@@ -546,63 +581,58 @@ const EditTemplate = () => {
                                                 {!isOptionalBlocksCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                                             </button>
                                         </div>
-
                                         <AnimatePresence>
                                             {!isOptionalBlocksCollapsed && (
                                                 <motion.div
                                                     initial={{ height: 0, opacity: 0 }}
                                                     animate={{ height: "auto", opacity: 1 }}
                                                     exit={{ height: 0, opacity: 0 }}
-                                                    className="space-y-6 overflow-hidden mt-4 pt-4 border-t border-border"
+                                                    className="overflow-hidden mt-4 pt-4 border-t border-border"
                                                 >
-                                                    <div className="space-y-3">
-                                                        <div
-                                                            className="flex items-center justify-between cursor-pointer group"
-                                                            onClick={() => setIsStandardBlocksCollapsed(!isStandardBlocksCollapsed)}
-                                                        >
-                                                            <h3 className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">Blocos Padrões (Apps e Credenciais)</h3>
-                                                            <button
-                                                                type="button"
-                                                                className="p-1 hover:bg-background rounded-md transition-colors text-muted-foreground focus:outline-none"
-                                                            >
-                                                                {isStandardBlocksCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                                                            </button>
-                                                        </div>
-
-                                                        <AnimatePresence>
-                                                            {!isStandardBlocksCollapsed && (
-                                                                <motion.div
-                                                                    initial={{ height: 0, opacity: 0 }}
-                                                                    animate={{ height: "auto", opacity: 1 }}
-                                                                    exit={{ height: 0, opacity: 0 }}
-                                                                    className="space-y-3 overflow-hidden"
-                                                                >
-                                                                    {[
-                                                                        { key: "hasTreino", label: "Treino" },
-                                                                        { key: "hasPsicologa", label: "Psicóloga" },
-                                                                        { key: "hasBioimpedancia", label: "Bioimpedância" },
-                                                                        { key: "hasAreaMembros", label: "Área de Membros" },
-                                                                        { key: "hasApps", label: "Apps (WebDiet / MFit)" },
-                                                                    ].map(({ key, label }) => (
-                                                                        <label key={key} className="flex items-center justify-between p-3 rounded-md bg-background cursor-pointer border border-border">
-                                                                            <span className="text-sm text-foreground">{label}</span>
-                                                                            <input type="checkbox" checked={(form as any)[key]} onChange={(e) => update(key as any, e.target.checked)} className="w-5 h-5 rounded accent-gold" />
-                                                                        </label>
-                                                                    ))}
-                                                                </motion.div>
-                                                            )}
-                                                        </AnimatePresence>
-                                                    </div>
-
-                                                    <div className="pt-2 border-t border-border mt-6">
-                                                        <h3 className="text-xs text-muted-foreground font-medium mb-4">Blocos 100% Customizados</h3>
-                                                        <SortableCustomBlocks
-                                                            blocks={form.optionalBlocks as any}
-                                                            collapsedState={form.collapsedOptionalBlocks}
-                                                            onChange={(blocks) => update("optionalBlocks", blocks)}
-                                                            onCollapseChange={(newState) => update("collapsedOptionalBlocks", newState)}
-                                                        />
-                                                    </div>
+                                                    <p className="text-xs text-muted-foreground mb-3">Blocos 100% personalizados que aparecem como cards expandidos na página do aluno.</p>
+                                                    <SortableCustomBlocks
+                                                        blocks={form.optionalBlocks as any}
+                                                        collapsedState={form.collapsedOptionalBlocks}
+                                                        onChange={(blocks) => update("optionalBlocks", blocks)}
+                                                        onCollapseChange={(newState) => update("collapsedOptionalBlocks", newState)}
+                                                    />
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                );
+                            case "standardButtons":
+                                return (
+                                    <div key="standardButtons" className="p-5 rounded-lg bg-card border border-border">
+                                        <div
+                                            className="flex items-center justify-between cursor-pointer -m-5 p-5"
+                                            onClick={() => setIsStandardBlocksCollapsed(!isStandardBlocksCollapsed)}
+                                        >
+                                            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">
+                                                🎯 Botões Padrões
+                                            </h2>
+                                            <button
+                                                type="button"
+                                                className="p-1 hover:bg-secondary rounded-md transition-colors text-muted-foreground focus:outline-none"
+                                            >
+                                                {!isStandardBlocksCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        <AnimatePresence>
+                                            {!isStandardBlocksCollapsed && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: "auto", opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="overflow-hidden mt-4 pt-4 border-t border-border"
+                                                >
+                                                    <p className="text-xs text-muted-foreground mb-3">Configure os botões padrões deste template. Arraste para reordenar.</p>
+                                                    <StandardBlocksEditor
+                                                        value={form.standardBlocks}
+                                                        onChange={(next) => update("standardBlocks", next)}
+                                                        order={form.standardBlocksOrder}
+                                                        onOrderChange={(next) => update("standardBlocksOrder", next)}
+                                                    />
                                                 </motion.div>
                                             )}
                                         </AnimatePresence>
@@ -645,31 +675,7 @@ const EditTemplate = () => {
                                     </div>
                                 );
                             case "credentials":
-                                return form.hasApps ? (
-                                    <div key="credentials" className="p-5 rounded-lg bg-card border border-border space-y-4">
-                                        <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🔐 Credenciais Padrão</h2>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-xs text-muted-foreground font-medium">WebDiet Login</label>
-                                                <input value={form.webdietLogin} onChange={(e) => update("webdietLogin", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs text-muted-foreground font-medium">WebDiet Senha</label>
-                                                <input value={form.webdietPassword} onChange={(e) => update("webdietPassword", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-xs text-muted-foreground font-medium">MFit Login</label>
-                                                <input value={form.mfitLogin} onChange={(e) => update("mfitLogin", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs text-muted-foreground font-medium">MFit Senha</label>
-                                                <input value={form.mfitPassword} onChange={(e) => update("mfitPassword", e.target.value)} className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : null;
+                                return null;
                             case "guidelines":
                                 return (
                                     <div key="guidelines" className="p-5 rounded-lg bg-card border border-border">
@@ -696,8 +702,12 @@ const EditTemplate = () => {
                                                     exit={{ height: 0, opacity: 0 }}
                                                     className="space-y-4 overflow-hidden pt-4 mt-6 border-t border-border"
                                                 >
-                                                    <div>
+                                                    <div className="space-y-2">
                                                         <input value={form.guidelinesTitle} onChange={(e) => update("guidelinesTitle", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground font-semibold" placeholder="Título da Seção (ex: 📌 Orientações Importantes)" />
+                                                        <label className="flex items-center gap-2 cursor-pointer">
+                                                            <input type="checkbox" checked={form.hideGuidelinesTitle} onChange={(e) => update("hideGuidelinesTitle", e.target.checked)} className="w-4 h-4 accent-gold" />
+                                                            <span className="text-xs text-muted-foreground">Ocultar título da seção (mostra só os destaques)</span>
+                                                        </label>
                                                     </div>
                                         <RichTextEditor value={form.guidelinesContent} onChange={(val) => update("guidelinesContent", val)} placeholder="Orientações padrão para o aluno com suporte a formatação..." />
                                         <div className="flex items-center justify-between mt-4">
@@ -790,33 +800,35 @@ const EditTemplate = () => {
                                     </div>
                                 );
                             case "support":
-                                return (
-                                    <div key="support" className="p-5 rounded-lg bg-card border border-border space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">❓ FAQs Padrão</h2>
-                                            <button onClick={addFaq} className="flex items-center gap-1 text-xs text-gold hover:text-gold-dark transition-colors">
-                                                <Plus className="w-3 h-3" /> Adicionar
-                                            </button>
-                                        </div>
-                                        {form.faqs.map((faq, i) => (
-                                            <div key={i} className="flex gap-2">
-                                                <div className="flex-1 space-y-2">
-                                                    <input value={faq.question} onChange={(e) => updateFaq(i, "question", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Pergunta" />
-                                                    <input value={faq.answer} onChange={(e) => updateFaq(i, "answer", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Resposta" />
-                                                </div>
-                                                <button onClick={() => removeFaq(i)} className="p-2 text-muted-foreground hover:text-destructive self-start">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                        {form.faqs.length === 0 && <p className="text-xs text-muted-foreground">Nenhuma FAQ adicionada.</p>}
-                                    </div>
-                                );
+                                return null;
                             default:
                                 return null;
                         }
                     })}
 
+
+                    {/* Imagem Extras (rodapé) */}
+                    <div className="p-5 rounded-lg bg-card border border-border space-y-4">
+                        <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🖼️ Imagem Final (Extras)</h2>
+                        <p className="text-xs text-muted-foreground">Imagem fixa que aparece no rodapé da página do aluno, sem título nem card.</p>
+                        {form.extrasImageUrl && (
+                            <div className="relative w-full max-w-md rounded-lg overflow-hidden border border-border">
+                                <img src={form.extrasImageUrl} alt="Imagem extras" className="w-full h-48 object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => update("extrasImageUrl", "")}
+                                    className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 rounded-full text-white"
+                                    title="Remover"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        )}
+                        <ImageUpload
+                            label={form.extrasImageUrl ? "Trocar Imagem" : "Adicionar Imagem"}
+                            onUpload={(url) => update("extrasImageUrl", url)}
+                        />
+                    </div>
 
                     {/* Ordenação */}
                     <div className="p-5 rounded-lg bg-card border border-border">
