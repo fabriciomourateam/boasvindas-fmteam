@@ -13,7 +13,7 @@ import { Toaster } from "sonner";
 import { useStudentPage } from "@/hooks/useStudentPages";
 import { Loader2 } from "lucide-react";
 import { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
-import { mergeStandardBlocks } from "@/pages/CreatePage";
+import { mergeStandardBlocks, normalizeStandardBlocksOrder } from "@/pages/CreatePage";
 
 const objectiveLabels: Record<string, string> = {
   emagrecimento: "Emagrecimento",
@@ -59,6 +59,7 @@ const StudentPage = () => {
   const optionalBlocks = cc.optionalBlocks || [];
   const customLinks = cc.links || [];
   const extrasImageUrl: string = cc.extrasImageUrl || "";
+  const standardBlocksOrder = normalizeStandardBlocksOrder(cc.standardBlocksOrder);
   const standardBlocks = mergeStandardBlocks(cc.standardBlocks, {
     has_bioimpedancia: page.has_bioimpedancia,
     has_psicologa: page.has_psicologa,
@@ -120,7 +121,7 @@ const StudentPage = () => {
       case "optionalBlocks":
         return optionalBlocks.length > 0 ? <OptionalBlocks key="optionalBlocks" blocks={optionalBlocks} /> : null;
       case "standardButtons":
-        return <StandardBlocksGrid key="standardButtons" data={standardBlocks} />;
+        return <StandardBlocksGrid key="standardButtons" data={standardBlocks} order={standardBlocksOrder} />;
       case "support":
         return (
           <SupportSection
@@ -146,7 +147,7 @@ const StudentPage = () => {
       {sectionOrder.map(renderSection)}
 
       {/* standardButtons como fallback: se NÃO estiver no sectionOrder de templates antigos, renderiza no fim */}
-      {!sectionOrder.includes("standardButtons") && <StandardBlocksGrid data={standardBlocks} />}
+      {!sectionOrder.includes("standardButtons") && <StandardBlocksGrid data={standardBlocks} order={standardBlocksOrder} />}
 
       {extrasImageUrl && (
         <section className="bg-background">

@@ -41,6 +41,7 @@ export interface TemplateContent {
     collapsedHighlights?: Record<number, boolean>;
     collapsedOptionalBlocks?: Record<number, boolean>;
     standardBlocks?: any;
+    standardBlocksOrder?: any;
     extrasImageUrl?: string;
 }
 

@@ -1,93 +1,111 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Activity, Utensils, Dumbbell, Target, Brain, BookOpen, Copy, Eye, EyeOff } from "lucide-react";
+import { Activity, Utensils, Dumbbell, Target, Brain, BookOpen, Copy, Eye, EyeOff, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
+import type { StandardBlocksData, StandardBlockKey } from "@/pages/CreatePage";
+import { DEFAULT_STANDARD_BLOCKS_ORDER } from "@/pages/CreatePage";
 
-export interface StandardBlock {
-  enabled: boolean;
-  imageUrl?: string;
-  login?: string;
-  password?: string;
-  androidUrl?: string;
-  iosUrl?: string;
-}
-
-export interface AreaMembrosBlock {
-  enabled: boolean;
-  url?: string;
-}
-
-export interface StandardBlocksData {
-  bioimpedancia: StandardBlock;
-  planoAlimentar: StandardBlock;
-  treino: StandardBlock;
-  checkins: StandardBlock;
-  psicologa: StandardBlock;
-  areaMembros: AreaMembrosBlock;
-}
-
-type BlockKey = "bioimpedancia" | "planoAlimentar" | "treino" | "checkins" | "psicologa" | "areaMembros";
-
-const META: Record<BlockKey, { label: string; icon: React.ReactNode; gradient: string }> = {
-  bioimpedancia: { label: "Bioimpedância", icon: <Activity className="w-6 h-6" />, gradient: "from-emerald-500 to-emerald-700" },
-  planoAlimentar: { label: "Plano Alimentar", icon: <Utensils className="w-6 h-6" />, gradient: "from-blue-500 to-blue-700" },
-  treino: { label: "Treino", icon: <Dumbbell className="w-6 h-6" />, gradient: "from-primary to-gold-dark" },
-  checkins: { label: "Check-ins", icon: <Target className="w-6 h-6" />, gradient: "from-rose-500 to-rose-700" },
-  psicologa: { label: "Psicóloga", icon: <Brain className="w-6 h-6" />, gradient: "from-purple-500 to-purple-700" },
-  areaMembros: { label: "Área de Membros", icon: <BookOpen className="w-6 h-6" />, gradient: "from-primary to-gold-dark" },
+const META: Record<StandardBlockKey, { label: string; icon: React.ReactNode; gradient: string; glow: string }> = {
+  bioimpedancia: {
+    label: "Bioimpedância",
+    icon: <Activity className="w-9 h-9" strokeWidth={1.75} />,
+    gradient: "from-emerald-400 via-emerald-600 to-teal-700",
+    glow: "shadow-[0_10px_40px_-12px_rgba(16,185,129,0.55)]",
+  },
+  planoAlimentar: {
+    label: "Plano Alimentar",
+    icon: <Utensils className="w-9 h-9" strokeWidth={1.75} />,
+    gradient: "from-sky-400 via-blue-600 to-indigo-700",
+    glow: "shadow-[0_10px_40px_-12px_rgba(59,130,246,0.55)]",
+  },
+  treino: {
+    label: "Treino",
+    icon: <Dumbbell className="w-9 h-9" strokeWidth={1.75} />,
+    gradient: "from-amber-300 via-yellow-500 to-amber-700",
+    glow: "shadow-[0_10px_40px_-12px_rgba(245,158,11,0.6)]",
+  },
+  checkins: {
+    label: "Check-ins",
+    icon: <Target className="w-9 h-9" strokeWidth={1.75} />,
+    gradient: "from-rose-400 via-pink-600 to-rose-800",
+    glow: "shadow-[0_10px_40px_-12px_rgba(244,63,94,0.55)]",
+  },
+  psicologa: {
+    label: "Psicóloga",
+    icon: <Brain className="w-9 h-9" strokeWidth={1.75} />,
+    gradient: "from-fuchsia-400 via-purple-600 to-violet-800",
+    glow: "shadow-[0_10px_40px_-12px_rgba(168,85,247,0.55)]",
+  },
+  areaMembros: {
+    label: "Área de Membros",
+    icon: <BookOpen className="w-9 h-9" strokeWidth={1.75} />,
+    gradient: "from-amber-300 via-orange-500 to-amber-700",
+    glow: "shadow-[0_10px_40px_-12px_rgba(251,146,60,0.55)]",
+  },
 };
-
-const ORDER: BlockKey[] = ["bioimpedancia", "planoAlimentar", "treino", "checkins", "psicologa", "areaMembros"];
 
 interface StandardBlocksGridProps {
   data: StandardBlocksData;
+  order?: StandardBlockKey[];
 }
 
-const StandardBlocksGrid = ({ data }: StandardBlocksGridProps) => {
-  const [openKey, setOpenKey] = useState<BlockKey | null>(null);
+const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
+  const [openKey, setOpenKey] = useState<StandardBlockKey | null>(null);
 
-  const visibleKeys = ORDER.filter((k) => data[k]?.enabled);
+  const finalOrder = order && order.length > 0 ? order : DEFAULT_STANDARD_BLOCKS_ORDER;
+  const visibleKeys = finalOrder.filter((k) => data[k]?.enabled);
   if (visibleKeys.length === 0) return null;
+
+  const isOdd = visibleKeys.length % 2 === 1;
 
   const activeBlock = openKey ? data[openKey] : null;
   const activeMeta = openKey ? META[openKey] : null;
 
-  const handleCardClick = (key: BlockKey) => {
-    if (key === "areaMembros") {
-      const url = (data.areaMembros.url || "").trim();
-      if (url) {
-        window.open(url, "_blank", "noopener,noreferrer");
-      } else {
-        toast.error("Link da Área de Membros não configurado.");
-      }
-      return;
-    }
-    setOpenKey(key);
-  };
-
   return (
-    <section className="px-4 sm:px-8 py-10 bg-secondary/50">
+    <section className="px-4 sm:px-8 py-12 bg-gradient-to-b from-secondary/30 via-background to-secondary/30">
       <div className="max-w-lg mx-auto">
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {visibleKeys.map((key, i) => {
             const meta = META[key];
+            const isLastOdd = isOdd && i === visibleKeys.length - 1;
             return (
               <motion.button
                 key={key}
                 type="button"
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
+                transition={{ delay: i * 0.07, duration: 0.5, ease: "easeOut" }}
+                whileHover={{ y: -3, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => handleCardClick(key)}
-                className={`relative overflow-hidden rounded-xl border border-border bg-card shadow-sm hover:shadow-gold transition-all aspect-[5/3] flex flex-col items-center justify-center gap-2 p-4 group`}
+                onClick={() => setOpenKey(key)}
+                className={`group relative overflow-hidden rounded-3xl aspect-square ${isLastOdd ? "col-span-2 aspect-[2/1]" : ""} ${meta.glow} hover:shadow-[0_18px_55px_-12px_rgba(0,0,0,0.45)] transition-shadow duration-300`}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${meta.gradient} opacity-90`} />
-                <div className="relative text-white">{meta.icon}</div>
-                <div className="relative font-display text-base sm:text-lg text-white text-center leading-tight">
-                  {meta.label}
+                {/* Gradient base */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${meta.gradient}`} />
+                {/* Highlight diagonal */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/25 mix-blend-overlay" />
+                {/* Shine sweep on hover */}
+                <div className="absolute -inset-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute -left-1/3 top-0 h-full w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 translate-x-0 group-hover:translate-x-[400%] transition-transform duration-1000 ease-out" />
+                </div>
+                {/* Inner border */}
+                <div className="absolute inset-0 rounded-3xl ring-1 ring-white/20" />
+
+                {/* Content */}
+                <div className="relative h-full flex flex-col items-center justify-center gap-3 px-3 py-4 text-white">
+                  <div className="drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]">{meta.icon}</div>
+                  <div className="font-display text-base sm:text-lg leading-tight text-center tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">
+                    {meta.label}
+                  </div>
+                </div>
+
+                {/* Corner indicator */}
+                <div className="absolute top-2.5 right-2.5 opacity-70 group-hover:opacity-100 transition-opacity">
+                  <div className="w-7 h-7 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/25">
+                    <ArrowUpRight className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                  </div>
                 </div>
               </motion.button>
             );
@@ -95,38 +113,52 @@ const StandardBlocksGrid = ({ data }: StandardBlocksGridProps) => {
         </div>
       </div>
 
-      <Dialog open={openKey !== null && openKey !== "areaMembros"} onOpenChange={(open) => !open && setOpenKey(null)}>
-        <DialogContent className="max-w-md w-[calc(100%-2rem)] sm:w-full max-h-[90vh] overflow-y-auto p-0 gap-0 bg-background border border-border rounded-xl">
-          {activeMeta && activeBlock && openKey && openKey !== "areaMembros" && (
+      <Dialog open={openKey !== null} onOpenChange={(open) => !open && setOpenKey(null)}>
+        <DialogContent className="max-w-md w-[calc(100%-2rem)] sm:w-full max-h-[90vh] overflow-y-auto p-0 gap-0 bg-background border border-border rounded-2xl">
+          {activeMeta && activeBlock && openKey && (
             <>
-              <div className={`px-5 py-4 bg-gradient-to-r ${activeMeta.gradient} flex items-center gap-3`}>
-                <div className="text-white">{activeMeta.icon}</div>
-                <DialogTitle className="font-display text-xl text-white">{activeMeta.label}</DialogTitle>
+              <div className={`relative px-5 py-5 bg-gradient-to-br ${activeMeta.gradient} flex items-center gap-3 overflow-hidden`}>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/20 mix-blend-overlay" />
+                <div className="relative text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">{activeMeta.icon}</div>
+                <DialogTitle className="relative font-display text-2xl text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{activeMeta.label}</DialogTitle>
               </div>
               <div className="p-5 space-y-4">
-                {activeBlock.imageUrl && (
-                  <div className="w-full rounded-lg overflow-hidden border border-border bg-black/5">
-                    <img src={activeBlock.imageUrl} alt={activeMeta.label} className="w-full object-contain max-h-[60vh]" />
+                {(activeBlock as any).imageUrl && (
+                  <div className="w-full rounded-xl overflow-hidden border border-border bg-black/5">
+                    <img src={(activeBlock as any).imageUrl} alt={activeMeta.label} className="w-full object-contain max-h-[60vh]" />
                   </div>
                 )}
-                {(activeBlock.login || activeBlock.password) && (
-                  <CredentialsList login={activeBlock.login} password={activeBlock.password} />
+                {(activeBlock as any).description && (
+                  <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{(activeBlock as any).description}</div>
                 )}
-                {(activeBlock.androidUrl || activeBlock.iosUrl) && (
+                {((activeBlock as any).login || (activeBlock as any).password) && (
+                  <CredentialsList login={(activeBlock as any).login} password={(activeBlock as any).password} />
+                )}
+                {((activeBlock as any).androidUrl || (activeBlock as any).iosUrl) && (
                   <div className="flex flex-col sm:flex-row gap-3">
-                    {activeBlock.androidUrl && (
-                      <a href={activeBlock.androidUrl} target="_blank" rel="noopener noreferrer" className="flex-1 btn-premium text-[15px] text-center">
+                    {(activeBlock as any).androidUrl && (
+                      <a href={(activeBlock as any).androidUrl} target="_blank" rel="noopener noreferrer" className="flex-1 btn-premium text-[15px] text-center">
                         Android →
                       </a>
                     )}
-                    {activeBlock.iosUrl && (
-                      <a href={activeBlock.iosUrl} target="_blank" rel="noopener noreferrer" className="flex-1 btn-premium-secondary text-[15px] text-center">
+                    {(activeBlock as any).iosUrl && (
+                      <a href={(activeBlock as any).iosUrl} target="_blank" rel="noopener noreferrer" className="flex-1 btn-premium-secondary text-[15px] text-center">
                         iOS →
                       </a>
                     )}
                   </div>
                 )}
-                {!activeBlock.imageUrl && !activeBlock.login && !activeBlock.password && !activeBlock.androidUrl && !activeBlock.iosUrl && (
+                {openKey === "areaMembros" && (activeBlock as any).url && (
+                  <a
+                    href={(activeBlock as any).url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full btn-premium text-[15px]"
+                  >
+                    Acessar Área de Membros →
+                  </a>
+                )}
+                {!(activeBlock as any).imageUrl && !(activeBlock as any).description && !(activeBlock as any).login && !(activeBlock as any).password && !(activeBlock as any).androidUrl && !(activeBlock as any).iosUrl && !(openKey === "areaMembros" && (activeBlock as any).url) && (
                   <p className="text-sm text-muted-foreground text-center py-6">Conteúdo não configurado.</p>
                 )}
               </div>

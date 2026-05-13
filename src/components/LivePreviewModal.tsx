@@ -10,7 +10,7 @@ import SupportSection from "@/components/student-page/SupportSection";
 import FooterSection from "@/components/student-page/FooterSection";
 import StandardBlocksGrid from "@/components/student-page/StandardBlocksGrid";
 import { DEFAULT_SECTION_ORDER } from "@/components/SortableSections";
-import { mergeStandardBlocks } from "@/pages/CreatePage";
+import { mergeStandardBlocks, normalizeStandardBlocksOrder } from "@/pages/CreatePage";
 
 const objectiveLabels: Record<string, string> = {
     emagrecimento: "Emagrecimento",
@@ -52,6 +52,7 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
         links = [],
         sectionOrder = DEFAULT_SECTION_ORDER,
         standardBlocks: rawStandardBlocks,
+        standardBlocksOrder: rawStandardBlocksOrder,
         extrasImageUrl = "",
         hasTreino,
         hasPsicologa,
@@ -66,6 +67,7 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
 
     const firstName = isTemplate ? "Aluno(a)" : (name ? name.split(" ")[0] : "Aluno(a)");
 
+    const standardBlocksOrder = normalizeStandardBlocksOrder(rawStandardBlocksOrder);
     const standardBlocks = mergeStandardBlocks(rawStandardBlocks, {
         has_bioimpedancia: hasBioimpedancia,
         has_psicologa: hasPsicologa,
@@ -122,7 +124,7 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
             case "optionalBlocks":
                 return optionalBlocks.length > 0 ? <OptionalBlocks key="optionalBlocks" blocks={optionalBlocks} /> : null;
             case "standardButtons":
-                return <StandardBlocksGrid key="standardButtons" data={standardBlocks} />;
+                return <StandardBlocksGrid key="standardButtons" data={standardBlocks} order={standardBlocksOrder} />;
             case "support":
                 return (
                     <SupportSection
@@ -153,7 +155,7 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
                         objective={objectiveLabels[objective] || objective}
                     />
                     {sectionOrder.map(renderSection)}
-                    {!sectionOrder.includes("standardButtons") && <StandardBlocksGrid data={standardBlocks} />}
+                    {!sectionOrder.includes("standardButtons") && <StandardBlocksGrid data={standardBlocks} order={standardBlocksOrder} />}
                     {extrasImageUrl && (
                         <section className="bg-background">
                             <img src={extrasImageUrl} alt="" className="w-full max-w-lg mx-auto block" />

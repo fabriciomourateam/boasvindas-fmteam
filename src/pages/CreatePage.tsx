@@ -34,6 +34,7 @@ const plans = [
 export interface StandardBlock {
   enabled: boolean;
   imageUrl?: string;
+  description?: string;
   login?: string;
   password?: string;
   androidUrl?: string;
@@ -43,6 +44,7 @@ export interface StandardBlock {
 export interface AreaMembrosBlock {
   enabled: boolean;
   url?: string;
+  description?: string;
 }
 
 export interface StandardBlocksData {
@@ -53,6 +55,17 @@ export interface StandardBlocksData {
   psicologa: StandardBlock;
   areaMembros: AreaMembrosBlock;
 }
+
+export type StandardBlockKey = "bioimpedancia" | "planoAlimentar" | "treino" | "checkins" | "psicologa" | "areaMembros";
+
+export const DEFAULT_STANDARD_BLOCKS_ORDER: StandardBlockKey[] = [
+  "bioimpedancia",
+  "planoAlimentar",
+  "treino",
+  "checkins",
+  "psicologa",
+  "areaMembros",
+];
 
 const emptyStandardBlocks: StandardBlocksData = {
   bioimpedancia: { enabled: false },
@@ -84,10 +97,12 @@ export function mergeStandardBlocks(
     bioimpedancia: {
       enabled: r.bioimpedancia?.enabled ?? legacy.has_bioimpedancia ?? false,
       imageUrl: r.bioimpedancia?.imageUrl ?? "",
+      description: r.bioimpedancia?.description ?? "",
     },
     planoAlimentar: {
       enabled: r.planoAlimentar?.enabled ?? legacy.has_apps ?? false,
       imageUrl: r.planoAlimentar?.imageUrl ?? "",
+      description: r.planoAlimentar?.description ?? "",
       login: r.planoAlimentar?.login ?? legacy.webdiet_login ?? "",
       password: r.planoAlimentar?.password ?? legacy.webdiet_password ?? "",
       androidUrl: r.planoAlimentar?.androidUrl ?? "",
@@ -96,6 +111,7 @@ export function mergeStandardBlocks(
     treino: {
       enabled: r.treino?.enabled ?? legacy.has_treino ?? false,
       imageUrl: r.treino?.imageUrl ?? "",
+      description: r.treino?.description ?? "",
       login: r.treino?.login ?? legacy.mfit_login ?? "",
       password: r.treino?.password ?? legacy.mfit_password ?? "",
       androidUrl: r.treino?.androidUrl ?? "",
@@ -104,16 +120,32 @@ export function mergeStandardBlocks(
     checkins: {
       enabled: r.checkins?.enabled ?? false,
       imageUrl: r.checkins?.imageUrl ?? "",
+      description: r.checkins?.description ?? "",
     },
     psicologa: {
       enabled: r.psicologa?.enabled ?? legacy.has_psicologa ?? false,
       imageUrl: r.psicologa?.imageUrl ?? "",
+      description: r.psicologa?.description ?? "",
     },
     areaMembros: {
       enabled: r.areaMembros?.enabled ?? legacy.has_area_membros ?? false,
       url: r.areaMembros?.url ?? legacy.members_link ?? "",
+      description: r.areaMembros?.description ?? "",
     },
   };
+}
+
+/** Sanitiza/completa um array de ordem de blocos padrões. */
+export function normalizeStandardBlocksOrder(raw: any): StandardBlockKey[] {
+  const valid = new Set<StandardBlockKey>(DEFAULT_STANDARD_BLOCKS_ORDER);
+  const filtered = Array.isArray(raw)
+    ? (raw.filter((k: any) => valid.has(k)) as StandardBlockKey[])
+    : [];
+  // Acrescenta os que estiverem faltando, preservando a ordem default
+  for (const k of DEFAULT_STANDARD_BLOCKS_ORDER) {
+    if (!filtered.includes(k)) filtered.push(k);
+  }
+  return filtered;
 }
 
 interface FormState {
@@ -127,6 +159,7 @@ interface FormState {
   hasAreaMembros: boolean;
   hasApps: boolean;
   standardBlocks: StandardBlocksData;
+  standardBlocksOrder: StandardBlockKey[];
   extrasImageUrl: string;
   membersLink: string;
   supportLink: string;
@@ -182,6 +215,7 @@ const defaultForm: FormState = {
   hasAreaMembros: true,
   hasApps: true,
   standardBlocks: emptyStandardBlocks,
+  standardBlocksOrder: DEFAULT_STANDARD_BLOCKS_ORDER,
   extrasImageUrl: "",
   membersLink: "",
   supportLink: "",
@@ -296,6 +330,7 @@ const CreatePage = () => {
         collapsedSteps: cc.collapsedSteps || {},
         collapsedHighlights: cc.collapsedHighlights || {},
         collapsedOptionalBlocks: cc.collapsedOptionalBlocks || {},
+        standardBlocksOrder: normalizeStandardBlocksOrder(cc.standardBlocksOrder),
         standardBlocks: mergeStandardBlocks(cc.standardBlocks, {
           has_bioimpedancia: existingPage.has_bioimpedancia,
           has_psicologa: existingPage.has_psicologa,
@@ -364,6 +399,7 @@ const CreatePage = () => {
       collapsedSteps: content.collapsedSteps || prev.collapsedSteps,
       collapsedHighlights: content.collapsedHighlights || prev.collapsedHighlights,
       collapsedOptionalBlocks: content.collapsedOptionalBlocks || prev.collapsedOptionalBlocks,
+      standardBlocksOrder: normalizeStandardBlocksOrder(content.standardBlocksOrder),
       standardBlocks: mergeStandardBlocks(content.standardBlocks, {
         has_bioimpedancia: blocks.hasBioimpedancia,
         has_psicologa: blocks.hasPsicologa,
@@ -406,6 +442,7 @@ const CreatePage = () => {
       collapsedHighlights: form.collapsedHighlights,
       collapsedOptionalBlocks: form.collapsedOptionalBlocks,
       standardBlocks: form.standardBlocks,
+      standardBlocksOrder: form.standardBlocksOrder,
       extrasImageUrl: form.extrasImageUrl,
     } as Json;
   };
@@ -500,6 +537,7 @@ const CreatePage = () => {
       collapsedHighlights: form.collapsedHighlights,
       collapsedOptionalBlocks: form.collapsedOptionalBlocks,
       standardBlocks: form.standardBlocks,
+      standardBlocksOrder: form.standardBlocksOrder,
       extrasImageUrl: form.extrasImageUrl,
     };
 
@@ -981,6 +1019,8 @@ const CreatePage = () => {
                                   <StandardBlocksEditor
                                     value={form.standardBlocks}
                                     onChange={(next) => update("standardBlocks", next)}
+                                    order={form.standardBlocksOrder}
+                                    onOrderChange={(next) => update("standardBlocksOrder", next)}
                                   />
                                 </motion.div>
                               )}
