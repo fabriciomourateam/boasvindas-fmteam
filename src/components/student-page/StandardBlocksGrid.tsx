@@ -142,9 +142,11 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
               </div>
               <div className="p-5 space-y-4">
                 {(activeBlock as any).imageUrl && (
-                  <div className="w-full rounded-xl overflow-hidden border border-border bg-black/5">
-                    <img src={(activeBlock as any).imageUrl} alt={activeMeta.label} className="w-full object-contain max-h-[60vh]" />
-                  </div>
+                  <img
+                    src={(activeBlock as any).imageUrl}
+                    alt={activeMeta.label}
+                    className="block mx-auto max-w-full max-h-[70vh] rounded-xl border border-border"
+                  />
                 )}
                 {(activeBlock as any).description && (
                   <div
