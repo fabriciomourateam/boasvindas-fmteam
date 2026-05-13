@@ -157,6 +157,7 @@ interface FormState {
   standardBlocks: StandardBlocksData;
   standardBlocksOrder: StandardBlockKey[];
   extrasImageUrl: string;
+  editorCollapse: Record<string, boolean>;
   membersLink: string;
   supportLink: string;
   webdietLogin: string;
@@ -213,6 +214,7 @@ const defaultForm: FormState = {
   standardBlocks: emptyStandardBlocks,
   standardBlocksOrder: DEFAULT_STANDARD_BLOCKS_ORDER,
   extrasImageUrl: "",
+  editorCollapse: {},
   membersLink: "",
   supportLink: "",
   webdietLogin: "",
@@ -251,16 +253,13 @@ const CreatePage = () => {
   const [form, setForm] = useState<FormState>({ ...defaultForm });
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
 
-  const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(true);
-  const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(false);
-  const [isStandardBlocksCollapsed, setIsStandardBlocksCollapsed] = useState(true);
-  const [isNotesCollapsed, setIsNotesCollapsed] = useState(false);
-  const [isGuidelinesCollapsed, setIsGuidelinesCollapsed] = useState(false);
-  const [isBasicInfoCollapsed, setIsBasicInfoCollapsed] = useState(true);
-  const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
-  const [isStepsCollapsed, setIsStepsCollapsed] = useState(false);
-  const [isLinksCollapsed, setIsLinksCollapsed] = useState(true);
-  const [isExtrasCollapsed, setIsExtrasCollapsed] = useState(true);
+  // Estados de UI persistidos em form.editorCollapse (default: aberto, exceto basicInfo)
+  const isNotesCollapsed = form.editorCollapse?.notes ?? false;
+  const setIsNotesCollapsed = (v: boolean) =>
+    update("editorCollapse", { ...form.editorCollapse, notes: v });
+  const isBasicInfoCollapsed = form.editorCollapse?.basicInfo ?? true;
+  const setIsBasicInfoCollapsed = (v: boolean) =>
+    update("editorCollapse", { ...form.editorCollapse, basicInfo: v });
   const toggleStepCollapse = (i: number) => {
     const novoEstado = { ...form.collapsedSteps, [i]: !form.collapsedSteps[i] };
     update("collapsedSteps", novoEstado);
@@ -340,6 +339,7 @@ const CreatePage = () => {
           members_link: existingPage.members_link,
         }),
         extrasImageUrl: cc.extrasImageUrl || "",
+        editorCollapse: (cc.editorCollapse && typeof cc.editorCollapse === "object") ? cc.editorCollapse : {},
       });
     }
   }, [isEditing, existingPage]);
@@ -409,6 +409,7 @@ const CreatePage = () => {
         members_link: content.membersLink,
       }),
       extrasImageUrl: content.extrasImageUrl ?? prev.extrasImageUrl,
+      editorCollapse: (content.editorCollapse && typeof content.editorCollapse === "object") ? content.editorCollapse : prev.editorCollapse,
     }));
 
     toast.success("Template aplicado!");
@@ -440,6 +441,7 @@ const CreatePage = () => {
       standardBlocks: form.standardBlocks,
       standardBlocksOrder: form.standardBlocksOrder,
       extrasImageUrl: form.extrasImageUrl,
+      editorCollapse: form.editorCollapse,
     } as Json;
   };
 
@@ -535,6 +537,7 @@ const CreatePage = () => {
       standardBlocks: form.standardBlocks,
       standardBlocksOrder: form.standardBlocksOrder,
       extrasImageUrl: form.extrasImageUrl,
+      editorCollapse: form.editorCollapse,
     };
 
     const blocks: TemplateBlocks = {

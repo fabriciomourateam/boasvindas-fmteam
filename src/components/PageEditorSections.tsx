@@ -42,6 +42,7 @@ export interface SharedFormShape {
   collapsedHighlights: Record<number, boolean>;
   extrasImageUrl: string;
   sectionOrder: string[];
+  editorCollapse: Record<string, boolean>;
 }
 
 interface Props {
@@ -49,16 +50,40 @@ interface Props {
   update: (key: string, value: any) => void;
 }
 
+/** Default: aberto. Algumas seções começam fechadas pra não poluir. */
+const DEFAULT_COLLAPSED: Record<string, boolean> = {
+  optionalBlocks: true,
+  links: true,
+  extras: true,
+  sectionOrder: true,
+  basicInfo: true,
+};
+
 const PageEditorSections = ({ form, update }: Props) => {
-  // Estados locais de UI (collapse) — só precisam viver na sessão atual
-  const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
-  const [isStepsCollapsed, setIsStepsCollapsed] = useState(false);
-  const [isStandardBlocksCollapsed, setIsStandardBlocksCollapsed] = useState(false);
-  const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(true);
-  const [isLinksCollapsed, setIsLinksCollapsed] = useState(true);
-  const [isGuidelinesCollapsed, setIsGuidelinesCollapsed] = useState(false);
-  const [isExtrasCollapsed, setIsExtrasCollapsed] = useState(true);
-  const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(true);
+  const ec = form.editorCollapse || {};
+  const isC = (k: string) => ec[k] ?? DEFAULT_COLLAPSED[k] ?? false;
+  const setC = (k: string, val: boolean) => update("editorCollapse", { ...ec, [k]: val });
+  const toggleC = (k: string) => setC(k, !isC(k));
+
+  // Aliases mantidos pra minimizar diff
+  const isSummaryCollapsed = isC("summary");
+  const isStepsCollapsed = isC("steps");
+  const isStandardBlocksCollapsed = isC("standardBlocks");
+  const isOptionalBlocksCollapsed = isC("optionalBlocks");
+  const isLinksCollapsed = isC("links");
+  const isGuidelinesCollapsed = isC("guidelines");
+  const isExtrasCollapsed = isC("extras");
+  const isSectionOrderCollapsed = isC("sectionOrder");
+  const setIsSummaryCollapsed = (v: boolean) => setC("summary", v);
+  const setIsStepsCollapsed = (v: boolean) => setC("steps", v);
+  const setIsStandardBlocksCollapsed = (v: boolean) => setC("standardBlocks", v);
+  const setIsOptionalBlocksCollapsed = (v: boolean) => setC("optionalBlocks", v);
+  const setIsLinksCollapsed = (v: boolean) => setC("links", v);
+  const setIsGuidelinesCollapsed = (v: boolean) => setC("guidelines", v);
+  const setIsExtrasCollapsed = (v: boolean) => setC("extras", v);
+  const setIsSectionOrderCollapsed = (v: boolean) => setC("sectionOrder", v);
+  // Silence "unused" warnings em modo strict (toggleC e useState não usados aqui)
+  void toggleC; void useState;
 
   // ─── Helpers para listas ────────────────────────────────────────────────────
   const addStep = () => update("steps", [...form.steps, { title: "", description: "" }]);

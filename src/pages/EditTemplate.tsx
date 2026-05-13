@@ -77,6 +77,7 @@ interface TemplateForm {
     standardBlocks: StandardBlocksData;
     standardBlocksOrder: StandardBlockKey[];
     extrasImageUrl: string;
+    editorCollapse: Record<string, boolean>;
 }
 
 const defaultForm: TemplateForm = {
@@ -115,6 +116,7 @@ const defaultForm: TemplateForm = {
     standardBlocks: mergeStandardBlocks(null, {}),
     standardBlocksOrder: DEFAULT_STANDARD_BLOCKS_ORDER,
     extrasImageUrl: "",
+    editorCollapse: {},
 };
 
 const EditTemplate = () => {
@@ -127,11 +129,9 @@ const EditTemplate = () => {
 
     const [form, setForm] = useState<TemplateForm>({ ...defaultForm });
 
-    const [isSectionOrderCollapsed, setIsSectionOrderCollapsed] = useState(true);
-    const [isOptionalBlocksCollapsed, setIsOptionalBlocksCollapsed] = useState(false);
-    const [isStandardBlocksCollapsed, setIsStandardBlocksCollapsed] = useState(true);
-    const [isNotesCollapsed, setIsNotesCollapsed] = useState(true);
-    const [isGuidelinesCollapsed, setIsGuidelinesCollapsed] = useState(false);
+    const isNotesCollapsed = form.editorCollapse?.notes ?? true;
+    const setIsNotesCollapsed = (v: boolean) =>
+        update("editorCollapse", { ...form.editorCollapse, notes: v });
     const toggleStepCollapse = (i: number) => {
         const novoEstado = { ...form.collapsedSteps, [i]: !form.collapsedSteps[i] };
         update("collapsedSteps", novoEstado);
@@ -200,6 +200,7 @@ const EditTemplate = () => {
                     members_link: content.membersLink,
                 }),
                 extrasImageUrl: content.extrasImageUrl || "",
+                editorCollapse: (content.editorCollapse && typeof content.editorCollapse === "object") ? content.editorCollapse : {},
             });
         }
     }, [existingTemplate, duplicateId]);
@@ -246,6 +247,7 @@ const EditTemplate = () => {
             standardBlocks: form.standardBlocks,
             standardBlocksOrder: form.standardBlocksOrder,
             extrasImageUrl: form.extrasImageUrl,
+            editorCollapse: form.editorCollapse,
         };
 
         const blocks: TemplateBlocks = {
