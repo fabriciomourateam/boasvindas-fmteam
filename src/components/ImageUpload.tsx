@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ImagePlus, Loader2, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ interface ImageUploadProps {
 }
 
 const ImageUpload = ({ onUpload, className, label = "Adicionar Imagem" }: ImageUploadProps) => {
+    const inputId = useId();
     const [isUploading, setIsUploading] = useState(false);
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
@@ -62,13 +63,13 @@ const ImageUpload = ({ onUpload, className, label = "Adicionar Imagem" }: ImageU
             <div>
                 <input
                     type="file"
-                    id="image-upload"
+                    id={inputId}
                     accept="image/*"
                     className="hidden"
                     onChange={handleFileChange}
                     disabled={isUploading}
                 />
-                <label htmlFor="image-upload">
+                <label htmlFor={inputId}>
                     <div className="inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-border bg-background hover:bg-secondary rounded-md cursor-pointer text-foreground">
                         {isUploading ? (
                             <Loader2 className="w-4 h-4 animate-spin text-gold" />
