@@ -205,6 +205,19 @@ const StandardBlocksEditor = ({ value, onChange, order, onOrderChange, openKeys,
                               )}
 
                               {KEYS_WITH_LINKS.includes(key) && (
+                                <div>
+                                  <label className="text-xs text-muted-foreground font-medium">Link do Aplicativo (web)</label>
+                                  <input
+                                    value={(block as StandardBlock).appUrl || ""}
+                                    onChange={(e) => updateBlock(key, { appUrl: e.target.value })}
+                                    className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground"
+                                    placeholder="https://app.exemplo.com"
+                                  />
+                                  <p className="text-[10px] text-muted-foreground mt-1">Exibe um botão "Acesse o Aplicativo" no modal.</p>
+                                </div>
+                              )}
+
+                              {KEYS_WITH_LINKS.includes(key) && (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                   <div>
                                     <label className="text-xs text-muted-foreground font-medium">Link Android</label>

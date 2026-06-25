@@ -35,6 +35,7 @@ export interface StandardBlock {
   password?: string;
   androidUrl?: string;
   iosUrl?: string;
+  appUrl?: string;
 }
 
 export interface AreaMembrosBlock {
@@ -103,6 +104,7 @@ export function mergeStandardBlocks(
       password: r.planoAlimentar?.password ?? legacy.webdiet_password ?? "",
       androidUrl: r.planoAlimentar?.androidUrl ?? "",
       iosUrl: r.planoAlimentar?.iosUrl ?? "",
+      appUrl: r.planoAlimentar?.appUrl ?? "",
     },
     treino: {
       enabled: r.treino?.enabled ?? legacy.has_treino ?? false,
@@ -112,6 +114,7 @@ export function mergeStandardBlocks(
       password: r.treino?.password ?? legacy.mfit_password ?? "",
       androidUrl: r.treino?.androidUrl ?? "",
       iosUrl: r.treino?.iosUrl ?? "",
+      appUrl: r.treino?.appUrl ?? "",
     },
     checkins: {
       enabled: r.checkins?.enabled ?? false,

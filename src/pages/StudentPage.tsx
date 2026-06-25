@@ -8,6 +8,7 @@ import OptionalBlocks from "@/components/student-page/OptionalBlocks";
 import SupportSection from "@/components/student-page/SupportSection";
 import FooterSection from "@/components/student-page/FooterSection";
 import ShareButton from "@/components/student-page/ShareButton";
+import ExportPdfButton from "@/components/student-page/ExportPdfButton";
 import StandardBlocksGrid from "@/components/student-page/StandardBlocksGrid";
 import { Toaster } from "sonner";
 import { useStudentPage } from "@/hooks/useStudentPages";
@@ -139,7 +140,7 @@ const StudentPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div id="student-page-root" className="min-h-screen bg-background">
       <Toaster position="top-center" />
 
       <HeroSection
@@ -161,6 +162,7 @@ const StudentPage = () => {
       <FooterSection />
 
       <ShareButton studentName={firstName} />
+      <ExportPdfButton studentName={firstName} />
     </div>
   );
 };

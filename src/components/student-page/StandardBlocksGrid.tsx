@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Activity, Utensils, Dumbbell, Target, Brain, BookOpen, Copy, Eye, EyeOff, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
-import type { StandardBlocksData, StandardBlockKey } from "@/pages/CreatePage";
+import type { StandardBlocksData, StandardBlock, AreaMembrosBlock, StandardBlockKey } from "@/pages/CreatePage";
 import { DEFAULT_STANDARD_BLOCKS_ORDER } from "@/pages/CreatePage";
+
+type AnyStandardBlock = Partial<StandardBlock & AreaMembrosBlock>;
 
 const META: Record<StandardBlockKey, { label: string; icon: React.ReactNode; iconLg: React.ReactNode; gradient: string; glow: string }> = {
   bioimpedancia: {
@@ -63,7 +65,7 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
   const visibleKeys = finalOrder.filter((k) => data[k]?.enabled);
   if (visibleKeys.length === 0) return null;
 
-  const activeBlock = openKey ? data[openKey] : null;
+  const activeBlock: AnyStandardBlock | null = openKey ? data[openKey] : null;
   const activeMeta = openKey ? META[openKey] : null;
 
   const isOdd = visibleKeys.length % 2 === 1;
@@ -141,39 +143,49 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
                 <DialogTitle className="relative font-display text-2xl text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{activeMeta.label}</DialogTitle>
               </div>
               <div className="p-5 space-y-4">
-                {(activeBlock as any).imageUrl && (
+                {activeBlock.imageUrl && (
                   <img
-                    src={(activeBlock as any).imageUrl}
+                    src={activeBlock.imageUrl}
                     alt={activeMeta.label}
                     className="block mx-auto max-w-full max-h-[70vh] rounded-xl border border-border"
                   />
                 )}
-                {(activeBlock as any).description && (
+                {activeBlock.description && (
                   <div
                     className="text-sm text-foreground leading-relaxed quill-content"
-                    dangerouslySetInnerHTML={{ __html: (activeBlock as any).description }}
+                    dangerouslySetInnerHTML={{ __html: activeBlock.description }}
                   />
                 )}
-                {((activeBlock as any).login || (activeBlock as any).password) && (
-                  <CredentialsList login={(activeBlock as any).login} password={(activeBlock as any).password} />
+                {(activeBlock.login || activeBlock.password) && (
+                  <CredentialsList login={activeBlock.login} password={activeBlock.password} />
                 )}
-                {((activeBlock as any).androidUrl || (activeBlock as any).iosUrl) && (
+                {activeBlock.appUrl && (
+                  <a
+                    href={activeBlock.appUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full btn-premium text-[15px]"
+                  >
+                    Acesse o Aplicativo →
+                  </a>
+                )}
+                {(activeBlock.androidUrl || activeBlock.iosUrl) && (
                   <div className="flex flex-col sm:flex-row gap-3">
-                    {(activeBlock as any).androidUrl && (
-                      <a href={(activeBlock as any).androidUrl} target="_blank" rel="noopener noreferrer" className="flex-1 btn-premium text-[15px] text-center">
+                    {activeBlock.androidUrl && (
+                      <a href={activeBlock.androidUrl} target="_blank" rel="noopener noreferrer" className="flex-1 btn-premium text-[15px] text-center">
                         Android →
                       </a>
                     )}
-                    {(activeBlock as any).iosUrl && (
-                      <a href={(activeBlock as any).iosUrl} target="_blank" rel="noopener noreferrer" className="flex-1 btn-premium-secondary text-[15px] text-center">
+                    {activeBlock.iosUrl && (
+                      <a href={activeBlock.iosUrl} target="_blank" rel="noopener noreferrer" className="flex-1 btn-premium-secondary text-[15px] text-center">
                         iOS →
                       </a>
                     )}
                   </div>
                 )}
-                {openKey === "areaMembros" && (activeBlock as any).url && (
+                {openKey === "areaMembros" && activeBlock.url && (
                   <a
-                    href={(activeBlock as any).url}
+                    href={activeBlock.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full btn-premium text-[15px]"
@@ -181,7 +193,7 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
                     Acessar Área de Membros →
                   </a>
                 )}
-                {!(activeBlock as any).imageUrl && !(activeBlock as any).description && !(activeBlock as any).login && !(activeBlock as any).password && !(activeBlock as any).androidUrl && !(activeBlock as any).iosUrl && !(openKey === "areaMembros" && (activeBlock as any).url) && (
+                {!activeBlock.imageUrl && !activeBlock.description && !activeBlock.login && !activeBlock.password && !activeBlock.appUrl && !activeBlock.androidUrl && !activeBlock.iosUrl && !(openKey === "areaMembros" && activeBlock.url) && (
                   <p className="text-sm text-muted-foreground text-center py-6">Conteúdo não configurado.</p>
                 )}
               </div>

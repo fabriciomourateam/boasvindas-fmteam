@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Eye } from "lucide-react";
+import ExportPdfButton from "@/components/student-page/ExportPdfButton";
 import HeroSection from "@/components/student-page/HeroSection";
 import PlanSummary from "@/components/student-page/PlanSummary";
 import NextSteps from "@/components/student-page/NextSteps";
@@ -153,7 +154,13 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
             {/* Usando max-w-[480px] para simular a visualização de celular */}
             <DialogContent className="max-w-[480px] w-full h-[90vh] overflow-y-auto p-0 gap-0 bg-background border border-border sm:rounded-xl">
                 <DialogTitle className="sr-only">Live Preview do Plano do Aluno</DialogTitle>
-                <div className="min-h-full bg-background pb-10">
+                <div
+                    data-html2canvas-ignore
+                    className="sticky top-0 z-10 flex justify-end p-2 bg-background/80 backdrop-blur border-b border-border"
+                >
+                    <ExportPdfButton studentName={firstName} targetSelector="#preview-page-root" inline />
+                </div>
+                <div id="preview-page-root" className="min-h-full bg-background pb-10">
                     <HeroSection
                         studentName={firstName}
                         objective={objectiveLabels[objective] || objective}
