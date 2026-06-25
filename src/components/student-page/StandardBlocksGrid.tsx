@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Activity, Utensils, Dumbbell, Target, Brain, BookOpen, Copy, Eye, EyeOff, ArrowUpRight } from "lucide-react";
+import { Activity, Utensils, Dumbbell, Target, Brain, BookOpen, Smartphone, Copy, Eye, EyeOff, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
 import type { StandardBlocksData, StandardBlock, AreaMembrosBlock, StandardBlockKey } from "@/pages/CreatePage";
 import { DEFAULT_STANDARD_BLOCKS_ORDER } from "@/pages/CreatePage";
@@ -43,6 +43,13 @@ const META: Record<StandardBlockKey, { label: string; icon: React.ReactNode; ico
     iconLg: <Brain className="w-9 h-9" strokeWidth={1.75} />,
     gradient: "from-fuchsia-400 via-purple-600 to-violet-800",
     glow: "shadow-[0_10px_40px_-12px_rgba(168,85,247,0.55)]",
+  },
+  acessarApp: {
+    label: "Acessar Aplicativo",
+    icon: <Smartphone className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.75} />,
+    iconLg: <Smartphone className="w-9 h-9" strokeWidth={1.75} />,
+    gradient: "from-cyan-400 via-teal-500 to-emerald-700",
+    glow: "shadow-[0_10px_40px_-12px_rgba(20,184,166,0.55)]",
   },
   areaMembros: {
     label: "Área de Membros",
@@ -193,7 +200,17 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
                     Acessar Área de Membros →
                   </a>
                 )}
-                {!activeBlock.imageUrl && !activeBlock.description && !activeBlock.login && !activeBlock.password && !activeBlock.appUrl && !activeBlock.androidUrl && !activeBlock.iosUrl && !(openKey === "areaMembros" && activeBlock.url) && (
+                {openKey === "acessarApp" && activeBlock.url && (
+                  <a
+                    href={activeBlock.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full btn-premium text-[15px]"
+                  >
+                    Acessar Aplicativo →
+                  </a>
+                )}
+                {!activeBlock.imageUrl && !activeBlock.description && !activeBlock.login && !activeBlock.password && !activeBlock.appUrl && !activeBlock.androidUrl && !activeBlock.iosUrl && !((openKey === "areaMembros" || openKey === "acessarApp") && activeBlock.url) && (
                   <p className="text-sm text-muted-foreground text-center py-6">Conteúdo não configurado.</p>
                 )}
               </div>
