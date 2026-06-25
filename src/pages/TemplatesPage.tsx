@@ -36,8 +36,8 @@ const TemplatesPage = () => {
         try {
             await deleteMutation.mutateAsync(id);
             toast.success("Template excluído!");
-        } catch {
-            toast.error("Erro ao excluir.");
+        } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Erro ao excluir.");
         }
     };
 
