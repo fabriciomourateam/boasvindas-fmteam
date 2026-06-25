@@ -51,7 +51,6 @@ const ShareButton = ({ studentName }: ShareButtonProps) => {
         <AnimatePresence>
             {isVisible && (
                 <motion.button
-                    data-html2canvas-ignore
                     initial={{ opacity: 0, scale: 0.5, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.5, y: 20 }}
