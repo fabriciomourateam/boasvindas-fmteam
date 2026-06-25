@@ -157,6 +157,16 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
                 {((activeBlock as any).login || (activeBlock as any).password) && (
                   <CredentialsList login={(activeBlock as any).login} password={(activeBlock as any).password} />
                 )}
+                {(activeBlock as any).appUrl && (
+                  <a
+                    href={(activeBlock as any).appUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full btn-premium text-[15px]"
+                  >
+                    Acesse o Aplicativo →
+                  </a>
+                )}
                 {((activeBlock as any).androidUrl || (activeBlock as any).iosUrl) && (
                   <div className="flex flex-col sm:flex-row gap-3">
                     {(activeBlock as any).androidUrl && (
@@ -181,7 +191,7 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
                     Acessar Área de Membros →
                   </a>
                 )}
-                {!(activeBlock as any).imageUrl && !(activeBlock as any).description && !(activeBlock as any).login && !(activeBlock as any).password && !(activeBlock as any).androidUrl && !(activeBlock as any).iosUrl && !(openKey === "areaMembros" && (activeBlock as any).url) && (
+                {!(activeBlock as any).imageUrl && !(activeBlock as any).description && !(activeBlock as any).login && !(activeBlock as any).password && !(activeBlock as any).appUrl && !(activeBlock as any).androidUrl && !(activeBlock as any).iosUrl && !(openKey === "areaMembros" && (activeBlock as any).url) && (
                   <p className="text-sm text-muted-foreground text-center py-6">Conteúdo não configurado.</p>
                 )}
               </div>
