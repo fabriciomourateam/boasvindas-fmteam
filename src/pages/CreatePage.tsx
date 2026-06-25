@@ -36,6 +36,7 @@ export interface StandardBlock {
   androidUrl?: string;
   iosUrl?: string;
   appUrl?: string;
+  url?: string;
 }
 
 export interface AreaMembrosBlock {
@@ -50,10 +51,11 @@ export interface StandardBlocksData {
   treino: StandardBlock;
   checkins: StandardBlock;
   psicologa: StandardBlock;
+  acessarApp: StandardBlock;
   areaMembros: AreaMembrosBlock;
 }
 
-export type StandardBlockKey = "bioimpedancia" | "planoAlimentar" | "treino" | "checkins" | "psicologa" | "areaMembros";
+export type StandardBlockKey = "bioimpedancia" | "planoAlimentar" | "treino" | "checkins" | "psicologa" | "acessarApp" | "areaMembros";
 
 export const DEFAULT_STANDARD_BLOCKS_ORDER: StandardBlockKey[] = [
   "bioimpedancia",
@@ -61,6 +63,7 @@ export const DEFAULT_STANDARD_BLOCKS_ORDER: StandardBlockKey[] = [
   "treino",
   "checkins",
   "psicologa",
+  "acessarApp",
   "areaMembros",
 ];
 
@@ -70,6 +73,7 @@ const emptyStandardBlocks: StandardBlocksData = {
   treino: { enabled: false },
   checkins: { enabled: false },
   psicologa: { enabled: false },
+  acessarApp: { enabled: false },
   areaMembros: { enabled: false },
 };
 
@@ -125,6 +129,12 @@ export function mergeStandardBlocks(
       enabled: r.psicologa?.enabled ?? legacy.has_psicologa ?? false,
       imageUrl: r.psicologa?.imageUrl ?? "",
       description: r.psicologa?.description ?? "",
+    },
+    acessarApp: {
+      enabled: r.acessarApp?.enabled ?? false,
+      imageUrl: r.acessarApp?.imageUrl ?? "",
+      description: r.acessarApp?.description ?? "",
+      url: r.acessarApp?.url ?? "",
     },
     areaMembros: {
       enabled: r.areaMembros?.enabled ?? legacy.has_area_membros ?? false,
