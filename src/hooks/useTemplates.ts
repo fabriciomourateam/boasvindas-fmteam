@@ -161,12 +161,19 @@ export function useDeleteTemplate() {
 
     return useMutation({
         mutationFn: async (id: string) => {
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from("templates")
                 .delete()
-                .eq("id", id);
+                .eq("id", id)
+                .select("id");
 
             if (error) throw error;
+            // Sem erro mas nenhuma linha removida = bloqueado por RLS (falta policy de DELETE)
+            if (!data || data.length === 0) {
+                throw new Error(
+                    "Não foi possível excluir o template (permissão negada). Verifique a policy de DELETE da tabela templates no Supabase."
+                );
+            }
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["templates"] });
