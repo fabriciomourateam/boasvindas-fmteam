@@ -133,6 +133,12 @@ const StudentPage = () => {
           />
         );
       }
+      case "extras":
+        return extrasImageUrl ? (
+          <section key="extras" className="bg-background">
+            <img src={extrasImageUrl} alt="" className="w-full max-w-lg mx-auto block" />
+          </section>
+        ) : null;
       default:
         return null;
     }
@@ -152,7 +158,8 @@ const StudentPage = () => {
       {/* standardButtons como fallback: se NÃO estiver no sectionOrder de templates antigos, renderiza no fim */}
       {!sectionOrder.includes("standardButtons") && <StandardBlocksGrid data={standardBlocks} order={standardBlocksOrder} />}
 
-      {extrasImageUrl && (
+      {/* extras como fallback: se NÃO estiver no sectionOrder, renderiza no fim */}
+      {!sectionOrder.includes("extras") && extrasImageUrl && (
         <section className="bg-background">
           <img src={extrasImageUrl} alt="" className="w-full max-w-lg mx-auto block" />
         </section>

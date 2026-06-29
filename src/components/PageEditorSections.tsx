@@ -486,7 +486,7 @@ const PageEditorSections = ({ form, update }: Props) => {
       {/* Imagem Extras (rodapé) */}
       <div className="p-5 rounded-lg bg-card border border-border">
         <div className="flex items-center justify-between cursor-pointer -m-5 p-5" onClick={() => setIsExtrasCollapsed(!isExtrasCollapsed)}>
-          <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🖼️ Imagem Final (Extras)</h2>
+          <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🖼️ Imagem (Extras)</h2>
           <button type="button" className="p-1 hover:bg-secondary rounded-md text-muted-foreground">
             {!isExtrasCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           </button>
@@ -494,7 +494,7 @@ const PageEditorSections = ({ form, update }: Props) => {
         <AnimatePresence>
           {!isExtrasCollapsed && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-4 pt-4 mt-1">
-              <p className="text-xs text-muted-foreground">Imagem fixa que aparece no rodapé da página do aluno, sem título nem card. Deixe vazio para não exibir.</p>
+              <p className="text-xs text-muted-foreground">Imagem solta (sem título nem card) na página do aluno. Use a "Ordenação das Seções" abaixo para escolher onde ela aparece (topo, meio ou rodapé). Deixe vazio para não exibir.</p>
               {form.extrasImageUrl && (
                 <div className="relative w-full max-w-md rounded-lg overflow-hidden border border-border">
                   <img src={form.extrasImageUrl} alt="Imagem extras" className="w-full h-48 object-cover" />
