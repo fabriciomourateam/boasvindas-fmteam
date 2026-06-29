@@ -241,6 +241,31 @@ const StandardBlocksEditor = ({ value, onChange, order, onOrderChange, openKeys,
                                 </div>
                               )}
 
+                              {key === "acessarApp" && (
+                                <div className="space-y-2 pt-3 border-t border-border">
+                                  <p className="text-xs font-medium text-foreground">Acesso via web (fallback) — opcional</p>
+                                  <div>
+                                    <label className="text-xs text-muted-foreground font-medium">Texto explicativo</label>
+                                    <textarea
+                                      value={(block as StandardBlock).urlText || ""}
+                                      onChange={(e) => updateBlock(key, { urlText: e.target.value })}
+                                      rows={2}
+                                      className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground resize-y"
+                                      placeholder="Caso não consiga baixar o App na PlayStore ou Apple Store, acesse via web pelo link abaixo:"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-xs text-muted-foreground font-medium">Link web</label>
+                                    <input
+                                      value={(block as StandardBlock).url || ""}
+                                      onChange={(e) => updateBlock(key, { url: e.target.value })}
+                                      className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground"
+                                      placeholder="https://meu-acompanhamento.vercel.app/"
+                                    />
+                                  </div>
+                                </div>
+                              )}
+
                               {key === "areaMembros" && (
                                 <div>
                                   <label className="text-xs text-muted-foreground font-medium">URL da Área de Membros</label>

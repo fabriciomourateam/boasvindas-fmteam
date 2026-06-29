@@ -201,14 +201,19 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
                   </a>
                 )}
                 {openKey === "acessarApp" && activeBlock.url && (
-                  <a
-                    href={activeBlock.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full btn-premium text-[15px]"
-                  >
-                    Acessar Aplicativo →
-                  </a>
+                  <div className="pt-4 mt-1 border-t border-border space-y-3">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {activeBlock.urlText || "Caso não consiga baixar o App na PlayStore ou Apple Store, acesse via web pelo link abaixo:"}
+                    </p>
+                    <a
+                      href={activeBlock.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full btn-premium-secondary text-[15px]"
+                    >
+                      Acessar via Web →
+                    </a>
+                  </div>
                 )}
                 {!activeBlock.imageUrl && !activeBlock.description && !activeBlock.login && !activeBlock.password && !activeBlock.appUrl && !activeBlock.androidUrl && !activeBlock.iosUrl && !((openKey === "areaMembros" || openKey === "acessarApp") && activeBlock.url) && (
                   <p className="text-sm text-muted-foreground text-center py-6">Conteúdo não configurado.</p>
