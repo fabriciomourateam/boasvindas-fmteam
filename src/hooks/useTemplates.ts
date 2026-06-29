@@ -56,7 +56,7 @@ export interface TemplateBlocks {
     hasAreaMembros?: boolean;
     hasApps?: boolean;
     optionalBlocks?: Array<{
-        type: "treino" | "psicologa" | "bioimpedancia" | "area_membros" | "apps" | "extras";
+        type: "treino" | "psicologa" | "bioimpedancia" | "area_membros" | "apps" | "extras" | "imagem";
         title: string;
         content: string;
         link?: string;
