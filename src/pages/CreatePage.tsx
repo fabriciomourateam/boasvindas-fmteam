@@ -37,6 +37,8 @@ export interface StandardBlock {
   iosUrl?: string;
   appUrl?: string;
   url?: string;
+  /** Texto explicativo do acesso via web (fallback) no bloco Acessar Aplicativo. */
+  urlText?: string;
 }
 
 export interface AreaMembrosBlock {
@@ -135,6 +137,7 @@ export function mergeStandardBlocks(
       imageUrl: r.acessarApp?.imageUrl ?? "",
       description: r.acessarApp?.description ?? "",
       url: r.acessarApp?.url ?? "",
+      urlText: r.acessarApp?.urlText ?? "",
       androidUrl: r.acessarApp?.androidUrl ?? "",
       iosUrl: r.acessarApp?.iosUrl ?? "",
     },
