@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Dumbbell, Brain, Activity, BookOpen, Smartphone, FileText, Target } from "lucide-react";
 
 interface OptionalBlock {
-  type: "treino" | "psicologa" | "bioimpedancia" | "area_membros" | "apps" | "checkin" | "extras";
+  type: "treino" | "psicologa" | "bioimpedancia" | "area_membros" | "apps" | "checkin" | "extras" | "imagem";
   title: string;
   content: string;
   link?: string;
@@ -45,6 +45,19 @@ const OptionalBlocks = ({ blocks }: OptionalBlocksProps) => {
       <div className="max-w-lg mx-auto space-y-4">
         {blocks.map((block, index) => (
           <div key={index}>
+            {block.type === "imagem" ? (
+              block.imageUrl ? (
+                <motion.img
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  src={block.imageUrl}
+                  alt={block.title || ""}
+                  className="w-full block rounded-lg"
+                />
+              ) : null
+            ) : (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -92,6 +105,7 @@ const OptionalBlocks = ({ blocks }: OptionalBlocksProps) => {
                 )}
               </div>
             </motion.div>
+            )}
 
             {/* Divisória Premium entre cards (não mostra no último elemento) */}
             {index < blocks.length - 1 && (

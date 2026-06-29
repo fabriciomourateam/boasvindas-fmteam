@@ -140,13 +140,14 @@ const SortableCustomBlocks = ({ blocks, collapsedState, onChange, onCollapseChan
                                                     <option value="apps">Apps</option>
                                                     <option value="checkin">Check-in</option>
                                                     <option value="extras">Extras</option>
+                                                    <option value="imagem">Imagem (só foto)</option>
                                                 </select>
 
                                                 <input
                                                     value={block.title}
                                                     onChange={(e) => updateBlock(i, "title", e.target.value)}
                                                     className="flex-1 px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground font-medium"
-                                                    placeholder="Título do bloco"
+                                                    placeholder={block.type === "imagem" ? "Imagem (sem título na página)" : "Título do bloco"}
                                                 />
 
                                                 <div className="flex gap-1 ml-auto">
@@ -179,6 +180,13 @@ const SortableCustomBlocks = ({ blocks, collapsedState, onChange, onCollapseChan
                                                                 </div>
                                                             )}
 
+                                                            {block.type === "imagem" ? (
+                                                                <>
+                                                                    <p className="text-xs text-muted-foreground">Bloco só de imagem (sem título, texto nem card). Aparece em largura cheia na página do aluno.</p>
+                                                                    <ImageUpload onUpload={(url) => updateBlock(i, "imageUrl", url)} label={block.imageUrl ? "Trocar Imagem" : "Adicionar Imagem"} />
+                                                                </>
+                                                            ) : (
+                                                            <>
                                                             <RichTextEditor value={block.content} onChange={(val) => updateBlock(i, "content", val)} placeholder="Conteúdo do bloco customizado..." />
 
                                                             <div className="grid grid-cols-2 gap-2 mt-2">
@@ -201,6 +209,8 @@ const SortableCustomBlocks = ({ blocks, collapsedState, onChange, onCollapseChan
                                                                 />
                                                                 <span className="text-xs text-muted-foreground">Centralizar conteúdo na página do aluno</span>
                                                             </label>
+                                                            </>
+                                                            )}
                                                         </div>
                                                     </motion.div>
                                                 )}
