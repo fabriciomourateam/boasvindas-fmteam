@@ -12,12 +12,12 @@ const META: Record<StandardBlockKey, { label: string; icon: React.ReactNode; hel
   treino: { label: "Treino (MFit)", icon: <Dumbbell className="w-4 h-4" />, helper: "Foto, texto explicativo, login/senha do MFit, links Android/iOS." },
   checkins: { label: "Check-ins", icon: <Target className="w-4 h-4" />, helper: "Anexe a foto explicando os check-ins." },
   psicologa: { label: "Psicóloga", icon: <Brain className="w-4 h-4" />, helper: "Anexe a foto da psicóloga." },
-  acessarApp: { label: "Acessar Aplicativo", icon: <Smartphone className="w-4 h-4" />, helper: "Texto + link único do aplicativo (abre modal com botão 'Acessar Aplicativo')." },
+  acessarApp: { label: "Acessar Aplicativo", icon: <Smartphone className="w-4 h-4" />, helper: "Texto + links do aplicativo (Android e iOS) — abre modal com os botões de acesso." },
   areaMembros: { label: "Área de Membros", icon: <BookOpen className="w-4 h-4" />, helper: "Texto + link da área de membros (abre modal com botão de acesso)." },
 };
 
 const KEYS_WITH_CREDS: StandardBlockKey[] = ["planoAlimentar", "treino"];
-const KEYS_WITH_LINKS: StandardBlockKey[] = ["planoAlimentar", "treino"];
+const KEYS_WITH_LINKS: StandardBlockKey[] = ["planoAlimentar", "treino", "acessarApp"];
 const KEYS_WITH_IMAGE: StandardBlockKey[] = ["bioimpedancia", "planoAlimentar", "treino", "checkins", "psicologa", "acessarApp"];
 const KEYS_WITH_DESCRIPTION: StandardBlockKey[] = ["planoAlimentar", "treino", "acessarApp", "areaMembros"];
 
@@ -238,18 +238,6 @@ const StandardBlocksEditor = ({ value, onChange, order, onOrderChange, openKeys,
                                       placeholder="https://apps.apple.com/..."
                                     />
                                   </div>
-                                </div>
-                              )}
-
-                              {key === "acessarApp" && (
-                                <div>
-                                  <label className="text-xs text-muted-foreground font-medium">Link do Aplicativo</label>
-                                  <input
-                                    value={(block as StandardBlock).url || ""}
-                                    onChange={(e) => updateBlock(key, { url: e.target.value })}
-                                    className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground"
-                                    placeholder="https://app.exemplo.com"
-                                  />
                                 </div>
                               )}
 
