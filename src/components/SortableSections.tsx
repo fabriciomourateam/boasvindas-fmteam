@@ -8,7 +8,8 @@ export const DEFAULT_SECTION_ORDER = [
     "links",
     "guidelines",
     "optionalBlocks",
-    "support"
+    "support",
+    "extras"
 ];
 
 export const SECTION_LABELS: Record<string, string> = {
@@ -19,6 +20,7 @@ export const SECTION_LABELS: Record<string, string> = {
     guidelines: "Orientações e Destaques",
     optionalBlocks: "Blocos Opcionais / Customizados",
     support: "Área de Suporte (WhatsApp)",
+    extras: "Imagem Final (Extras)",
 };
 
 /**
@@ -53,6 +55,10 @@ export function normalizeSectionOrder(raw: any): string[] {
             if (idx >= 0) { insertAt = idx; break; }
         }
         filtered.splice(insertAt, 0, "standardButtons");
+    }
+    // Auto-insere 'extras' (Imagem Final) no fim — seção nova; antes ficava fixa no rodapé.
+    if (!filtered.includes("extras")) {
+        filtered.push("extras");
     }
     return filtered;
 }
