@@ -135,6 +135,8 @@ export function mergeStandardBlocks(
       imageUrl: r.acessarApp?.imageUrl ?? "",
       description: r.acessarApp?.description ?? "",
       url: r.acessarApp?.url ?? "",
+      androidUrl: r.acessarApp?.androidUrl ?? "",
+      iosUrl: r.acessarApp?.iosUrl ?? "",
     },
     areaMembros: {
       enabled: r.areaMembros?.enabled ?? legacy.has_area_membros ?? false,
