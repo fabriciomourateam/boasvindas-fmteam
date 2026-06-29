@@ -723,7 +723,9 @@ const CreatePage = () => {
                 className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
               >
                 <option value="">Selecione um template (opcional)</option>
-                {templates.map((t) => (
+                {templates
+                  .filter((t) => !(t.content as Record<string, any>)?.archived)
+                  .map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.name} — {objectives.find((o) => o.value === t.objective)?.label}
                   </option>
