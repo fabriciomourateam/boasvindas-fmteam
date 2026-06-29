@@ -45,6 +45,8 @@ export interface TemplateContent {
     extrasImageUrl?: string;
     editorCollapse?: Record<string, boolean>;
     standardBlocksOpen?: string[] | null;
+    /** Soft-delete: template arquivado fica oculto da lista principal. */
+    archived?: boolean;
 }
 
 export interface TemplateBlocks {
@@ -149,6 +151,31 @@ export function useUpdateTemplate() {
 
             if (error) throw error;
             return data as Template;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
+        },
+    });
+}
+
+export function useArchiveTemplate() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, content, archived }: { id: string; content: any; archived: boolean }) => {
+            const newContent = { ...(content || {}), archived };
+            const { data, error } = await supabase
+                .from("templates")
+                .update({ content: newContent })
+                .eq("id", id)
+                .select("id");
+
+            if (error) throw error;
+            if (!data || data.length === 0) {
+                throw new Error(
+                    "Não foi possível arquivar o template (permissão negada). Verifique a policy de UPDATE da tabela templates no Supabase."
+                );
+            }
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["templates"] });

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, Edit2, Trash2, Copy, ArrowLeft, LayoutTemplate } from "lucide-react";
+import { Plus, Edit2, Copy, ArrowLeft, LayoutTemplate, Archive, ArchiveRestore } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAuth } from "@/hooks/useAuth";
-import { useTemplates, useDeleteTemplate } from "@/hooks/useTemplates";
+import { useTemplates, useArchiveTemplate } from "@/hooks/useTemplates";
 
 const objectiveLabels: Record<string, string> = {
     emagrecimento: "Emagrecimento",
@@ -21,23 +21,27 @@ const objectiveColors: Record<string, string> = {
 const TemplatesPage = () => {
     const navigate = useNavigate();
     const [filterObjective, setFilterObjective] = useState("todos");
+    const [showArchived, setShowArchived] = useState(false);
     useRequireAuth();
 
     const { data: templates = [], isLoading } = useTemplates();
-    const deleteMutation = useDeleteTemplate();
+    const archiveMutation = useArchiveTemplate();
+
+    const archivedCount = templates.filter((t) => !!(t.content as Record<string, any>)?.archived).length;
 
     const filteredTemplates = templates.filter((t) => {
+        const isArchived = !!(t.content as Record<string, any>)?.archived;
+        if (isArchived !== showArchived) return false;
         if (filterObjective === "todos") return true;
         return t.objective === filterObjective;
     });
 
-    const handleDelete = async (id: string, name: string) => {
-        if (!confirm(`Excluir o template "${name}"?`)) return;
+    const handleArchive = async (template: any, archived: boolean) => {
         try {
-            await deleteMutation.mutateAsync(id);
-            toast.success("Template excluído!");
+            await archiveMutation.mutateAsync({ id: template.id, content: template.content, archived });
+            toast.success(archived ? "Template arquivado!" : "Template desarquivado!");
         } catch (e) {
-            toast.error(e instanceof Error ? e.message : "Erro ao excluir.");
+            toast.error(e instanceof Error ? e.message : "Erro ao arquivar.");
         }
     };
 
@@ -71,7 +75,7 @@ const TemplatesPage = () => {
 
             <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8">
                 {/* Filters */}
-                <div className="flex gap-2 mb-6">
+                <div className="flex flex-wrap items-center gap-2 mb-6">
                     {["todos", "emagrecimento", "recomposicao", "hipertrofia"].map((obj) => (
                         <button
                             key={obj}
@@ -84,6 +88,17 @@ const TemplatesPage = () => {
                             {obj === "todos" ? "Todos" : objectiveLabels[obj]}
                         </button>
                     ))}
+                    <button
+                        onClick={() => setShowArchived((v) => !v)}
+                        className={`ml-auto flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${showArchived
+                                ? "bg-foreground text-background border-transparent"
+                                : "bg-card text-muted-foreground border-border hover:border-gold/50"
+                            }`}
+                        title={showArchived ? "Ver ativos" : "Ver arquivados"}
+                    >
+                        <Archive className="w-3.5 h-3.5" />
+                        {showArchived ? "Ver ativos" : `Arquivados${archivedCount ? ` (${archivedCount})` : ""}`}
+                    </button>
                 </div>
 
                 {/* Loading */}
@@ -157,13 +172,23 @@ const TemplatesPage = () => {
                                         >
                                             <Copy className="w-4 h-4" />
                                         </button>
-                                        <button
-                                            onClick={() => handleDelete(template.id, template.name)}
-                                            className="p-2 rounded-md hover:bg-destructive/10 transition-colors text-muted-foreground hover:text-destructive"
-                                            title="Excluir"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
+                                        {showArchived ? (
+                                            <button
+                                                onClick={() => handleArchive(template, false)}
+                                                className="p-2 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+                                                title="Desarquivar"
+                                            >
+                                                <ArchiveRestore className="w-4 h-4" />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleArchive(template, true)}
+                                                className="p-2 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+                                                title="Arquivar"
+                                            >
+                                                <Archive className="w-4 h-4" />
+                                            </button>
+                                        )}
                                     </div>
                                 </motion.div>
                             );
@@ -173,9 +198,11 @@ const TemplatesPage = () => {
                             <div className="col-span-full text-center py-16">
                                 <LayoutTemplate className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                                 <p className="text-muted-foreground text-sm">
-                                    {templates.length === 0
-                                        ? "Nenhum template criado. Crie o primeiro!"
-                                        : "Nenhum template encontrado para esse filtro."}
+                                    {showArchived
+                                        ? "Nenhum template arquivado."
+                                        : templates.length === 0
+                                            ? "Nenhum template criado. Crie o primeiro!"
+                                            : "Nenhum template encontrado para esse filtro."}
                                 </p>
                             </div>
                         )}
