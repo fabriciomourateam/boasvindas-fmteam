@@ -54,7 +54,7 @@ const OptionalBlocks = ({ blocks }: OptionalBlocksProps) => {
                   transition={{ delay: index * 0.1 }}
                   src={block.imageUrl}
                   alt={block.title || ""}
-                  className="w-full block rounded-lg"
+                  className="block w-[calc(100%+2rem)] sm:w-[calc(100%+4rem)] -mx-4 sm:-mx-8 max-w-none"
                 />
               ) : null
             ) : (
