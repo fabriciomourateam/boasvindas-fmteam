@@ -17,6 +17,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea
 import { Plus, Trash2, ChevronDown, ChevronRight, GripVertical, Copy, Eye, EyeOff } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import ImageUpload from "@/components/ImageUpload";
+import { CropButton } from "@/components/ImageCropModal";
 import SortableSections from "@/components/SortableSections";
 import SortableCustomBlocks from "@/components/SortableCustomBlocks";
 import StandardBlocksEditor from "@/components/StandardBlocksEditor";
@@ -498,6 +499,7 @@ const PageEditorSections = ({ form, update }: Props) => {
               {form.extrasImageUrl && (
                 <div className="relative w-full max-w-md rounded-lg overflow-hidden border border-border">
                   <img src={form.extrasImageUrl} alt="Imagem extras" className="w-full h-48 object-cover" />
+                  <CropButton src={form.extrasImageUrl} onCropped={(url) => update("extrasImageUrl", url)} />
                   <button type="button" onClick={() => update("extrasImageUrl", "")} className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 rounded-full text-white" title="Remover">
                     <Trash2 className="w-4 h-4" />
                   </button>
