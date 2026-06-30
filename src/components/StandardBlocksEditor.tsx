@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { ChevronDown, ChevronRight, Trash2, Activity, Utensils, Dumbbell, Target, Brain, BookOpen, Smartphone, GripVertical } from "lucide-react";
 import ImageUpload from "./ImageUpload";
+import { CropButton } from "./ImageCropModal";
 import RichTextEditor from "./RichTextEditor";
 import type { StandardBlocksData, StandardBlock, AreaMembrosBlock, StandardBlockKey } from "@/pages/CreatePage";
 
@@ -154,6 +155,7 @@ const StandardBlocksEditor = ({ value, onChange, order, onOrderChange, openKeys,
                                   {(block as StandardBlock).imageUrl && (
                                     <div className="relative w-full max-w-xs rounded-lg overflow-hidden border border-border">
                                       <img src={(block as StandardBlock).imageUrl} alt={meta.label} className="w-full h-32 object-cover" />
+                                      <CropButton src={(block as StandardBlock).imageUrl as string} onCropped={(url) => updateBlock(key, { imageUrl: url })} />
                                       <button
                                         type="button"
                                         onClick={() => updateBlock(key, { imageUrl: "" })}

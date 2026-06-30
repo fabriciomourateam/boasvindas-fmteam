@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea
 import { GripVertical, Trash2, Copy, Plus, ChevronDown, ChevronRight } from "lucide-react";
 import RichTextEditor from "./RichTextEditor";
 import ImageUpload from "./ImageUpload";
+import { CropButton } from "./ImageCropModal";
 import { motion, AnimatePresence } from "framer-motion";
 
 export interface CustomBlock {
@@ -174,6 +175,7 @@ const SortableCustomBlocks = ({ blocks, collapsedState, onChange, onCollapseChan
                                                             {block.imageUrl && (
                                                                 <div className="relative w-full h-32 rounded-lg overflow-hidden border border-border">
                                                                     <img src={block.imageUrl} alt="Capa do bloco" className="w-full h-full object-cover" />
+                                                                    <CropButton src={block.imageUrl} onCropped={(url) => updateBlock(i, "imageUrl", url)} />
                                                                     <button onClick={() => updateBlock(i, "imageUrl", "")} className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors">
                                                                         <Trash2 className="w-4 h-4" />
                                                                     </button>
