@@ -42,6 +42,7 @@ export interface SharedFormShape {
   guidelinesHighlights: Array<{ title: string; content: string; hidden?: boolean }>;
   collapsedHighlights: Record<number, boolean>;
   extrasImageUrl: string;
+  video: { url: string; buttonLabel: string; buttonUrl: string };
   sectionOrder: string[];
   editorCollapse: Record<string, boolean>;
   standardBlocksOpen?: string[] | null;
@@ -57,6 +58,7 @@ const DEFAULT_COLLAPSED: Record<string, boolean> = {
   optionalBlocks: true,
   links: true,
   extras: true,
+  video: true,
   sectionOrder: true,
   basicInfo: true,
 };
@@ -483,6 +485,52 @@ const PageEditorSections = ({ form, update }: Props) => {
   return (
     <>
       {form.sectionOrder.map(renderSection)}
+
+      {/* Vídeo (com botão) */}
+      <div className="p-5 rounded-lg bg-card border border-border">
+        <div className="flex items-center justify-between cursor-pointer -m-5 p-5" onClick={() => toggleC("video")}>
+          <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🎬 Vídeo (com botão)</h2>
+          <button type="button" className="p-1 hover:bg-secondary rounded-md text-muted-foreground">
+            {!isC("video") ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
+        </div>
+        <AnimatePresence>
+          {!isC("video") && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-3 pt-4 mt-1">
+              <p className="text-xs text-muted-foreground">Vídeo que aparece na página do aluno (por padrão logo abaixo da capa — reordenável em "Ordenação das Seções"). Deixe o link vazio para não exibir.</p>
+              <div>
+                <label className="text-xs text-muted-foreground font-medium">Link do vídeo (YouTube, Vimeo ou .mp4)</label>
+                <input
+                  value={form.video?.url || ""}
+                  onChange={(e) => update("video", { ...form.video, url: e.target.value })}
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground"
+                  placeholder="https://youtu.be/..."
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-muted-foreground font-medium">Texto do botão</label>
+                  <input
+                    value={form.video?.buttonLabel || ""}
+                    onChange={(e) => update("video", { ...form.video, buttonLabel: e.target.value })}
+                    className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground"
+                    placeholder="Acessar Área de Membros"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground font-medium">Link do botão</label>
+                  <input
+                    value={form.video?.buttonUrl || ""}
+                    onChange={(e) => update("video", { ...form.video, buttonUrl: e.target.value })}
+                    className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground"
+                    placeholder="Vazio = usa o link da Área de Membros"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Imagem Extras (rodapé) */}
       <div className="p-5 rounded-lg bg-card border border-border">

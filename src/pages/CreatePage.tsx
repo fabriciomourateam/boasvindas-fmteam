@@ -176,6 +176,7 @@ interface FormState {
   standardBlocksOrder: StandardBlockKey[];
   standardBlocksOpen: StandardBlockKey[] | null;
   extrasImageUrl: string;
+  video: { url: string; buttonLabel: string; buttonUrl: string };
   editorCollapse: Record<string, boolean>;
   membersLink: string;
   supportLink: string;
@@ -234,6 +235,7 @@ const defaultForm: FormState = {
   standardBlocksOrder: DEFAULT_STANDARD_BLOCKS_ORDER,
   standardBlocksOpen: null,
   extrasImageUrl: "",
+  video: { url: "", buttonLabel: "", buttonUrl: "" },
   editorCollapse: {},
   membersLink: "",
   supportLink: "",
@@ -359,6 +361,7 @@ const CreatePage = () => {
           members_link: existingPage.members_link,
         }),
         extrasImageUrl: cc.extrasImageUrl || "",
+        video: cc.video || { url: "", buttonLabel: "", buttonUrl: "" },
         editorCollapse: (cc.editorCollapse && typeof cc.editorCollapse === "object") ? cc.editorCollapse : {},
         standardBlocksOpen: Array.isArray(cc.standardBlocksOpen) ? cc.standardBlocksOpen : null,
       });
@@ -430,6 +433,7 @@ const CreatePage = () => {
         members_link: content.membersLink,
       }),
       extrasImageUrl: content.extrasImageUrl ?? prev.extrasImageUrl,
+      video: content.video ?? prev.video,
       editorCollapse: (content.editorCollapse && typeof content.editorCollapse === "object") ? content.editorCollapse : prev.editorCollapse,
       standardBlocksOpen: Array.isArray(content.standardBlocksOpen) ? content.standardBlocksOpen : prev.standardBlocksOpen,
     }));
@@ -463,6 +467,7 @@ const CreatePage = () => {
       standardBlocks: form.standardBlocks,
       standardBlocksOrder: form.standardBlocksOrder,
       extrasImageUrl: form.extrasImageUrl,
+      video: form.video,
       editorCollapse: form.editorCollapse,
       standardBlocksOpen: form.standardBlocksOpen,
     } as Json;
@@ -560,6 +565,7 @@ const CreatePage = () => {
       standardBlocks: form.standardBlocks,
       standardBlocksOrder: form.standardBlocksOrder,
       extrasImageUrl: form.extrasImageUrl,
+      video: form.video,
       editorCollapse: form.editorCollapse,
       standardBlocksOpen: form.standardBlocksOpen,
     };

@@ -78,6 +78,7 @@ interface TemplateForm {
     standardBlocksOrder: StandardBlockKey[];
     standardBlocksOpen: StandardBlockKey[] | null;
     extrasImageUrl: string;
+    video: { url: string; buttonLabel: string; buttonUrl: string };
     editorCollapse: Record<string, boolean>;
 }
 
@@ -118,6 +119,7 @@ const defaultForm: TemplateForm = {
     standardBlocksOrder: DEFAULT_STANDARD_BLOCKS_ORDER,
     standardBlocksOpen: null,
     extrasImageUrl: "",
+    video: { url: "", buttonLabel: "", buttonUrl: "" },
     editorCollapse: {},
 };
 
@@ -202,6 +204,7 @@ const EditTemplate = () => {
                     members_link: content.membersLink,
                 }),
                 extrasImageUrl: content.extrasImageUrl || "",
+                video: content.video || { url: "", buttonLabel: "", buttonUrl: "" },
                 editorCollapse: (content.editorCollapse && typeof content.editorCollapse === "object") ? content.editorCollapse : {},
                 standardBlocksOpen: Array.isArray(content.standardBlocksOpen) ? content.standardBlocksOpen : null,
             });
@@ -250,6 +253,7 @@ const EditTemplate = () => {
             standardBlocks: form.standardBlocks,
             standardBlocksOrder: form.standardBlocksOrder,
             extrasImageUrl: form.extrasImageUrl,
+            video: form.video,
             editorCollapse: form.editorCollapse,
             standardBlocksOpen: form.standardBlocksOpen,
         };

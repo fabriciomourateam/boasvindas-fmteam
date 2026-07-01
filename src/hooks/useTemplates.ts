@@ -43,6 +43,7 @@ export interface TemplateContent {
     standardBlocks?: any;
     standardBlocksOrder?: any;
     extrasImageUrl?: string;
+    video?: { url?: string; buttonLabel?: string; buttonUrl?: string };
     editorCollapse?: Record<string, boolean>;
     standardBlocksOpen?: string[] | null;
     /** Soft-delete: template arquivado fica oculto da lista principal. */
