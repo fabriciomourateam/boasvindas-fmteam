@@ -2,6 +2,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea
 import { GripVertical, EyeOff, Plus } from "lucide-react";
 
 export const DEFAULT_SECTION_ORDER = [
+    "video",
     "summary",
     "steps",
     "standardButtons",
@@ -13,6 +14,7 @@ export const DEFAULT_SECTION_ORDER = [
 ];
 
 export const SECTION_LABELS: Record<string, string> = {
+    video: "Vídeo (com botão)",
     summary: "Resumo do Plano (Objetivo, Estratégia)",
     steps: "Próximos Passos",
     standardButtons: "Botões (Bioimpedância, Plano, Treino, etc.)",
@@ -59,6 +61,10 @@ export function normalizeSectionOrder(raw: any): string[] {
     // Auto-insere 'extras' (Imagem Final) no fim — seção nova; antes ficava fixa no rodapé.
     if (!filtered.includes("extras")) {
         filtered.push("extras");
+    }
+    // Auto-insere 'video' no início (logo após a capa) — seção nova.
+    if (!filtered.includes("video")) {
+        filtered.unshift("video");
     }
     return filtered;
 }

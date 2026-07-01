@@ -8,6 +8,7 @@ import OptionalBlocks from "@/components/student-page/OptionalBlocks";
 import SupportSection from "@/components/student-page/SupportSection";
 import FooterSection from "@/components/student-page/FooterSection";
 import ShareButton from "@/components/student-page/ShareButton";
+import VideoSection from "@/components/student-page/VideoSection";
 import StandardBlocksGrid from "@/components/student-page/StandardBlocksGrid";
 import { Toaster } from "sonner";
 import { useStudentPage } from "@/hooks/useStudentPages";
@@ -89,8 +90,19 @@ const StudentPage = () => {
 
   const sectionOrder: string[] = normalizeSectionOrder(cc.sectionOrder || DEFAULT_SECTION_ORDER);
 
+  const video = cc.video || {};
+
   const renderSection = (section: string) => {
     switch (section) {
+      case "video":
+        return video.url ? (
+          <VideoSection
+            key="video"
+            url={video.url}
+            buttonLabel={video.buttonLabel}
+            buttonUrl={video.buttonUrl || page.members_link || undefined}
+          />
+        ) : null;
       case "summary":
         return (
           <PlanSummary

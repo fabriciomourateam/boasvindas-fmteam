@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Eye } from "lucide-react";
 import HeroSection from "@/components/student-page/HeroSection";
+import VideoSection from "@/components/student-page/VideoSection";
 import PlanSummary from "@/components/student-page/PlanSummary";
 import NextSteps from "@/components/student-page/NextSteps";
 import LinksBlock from "@/components/student-page/LinksBlock";
@@ -54,6 +55,7 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
         standardBlocks: rawStandardBlocks,
         standardBlocksOrder: rawStandardBlocksOrder,
         extrasImageUrl = "",
+        video = {},
         hasTreino,
         hasPsicologa,
         hasBioimpedancia,
@@ -95,6 +97,15 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
 
     const renderSection = (section: string) => {
         switch (section) {
+            case "video":
+                return video.url ? (
+                    <VideoSection
+                        key="video"
+                        url={video.url}
+                        buttonLabel={video.buttonLabel}
+                        buttonUrl={video.buttonUrl || membersLink || undefined}
+                    />
+                ) : null;
             case "summary":
                 return (
                     <PlanSummary
