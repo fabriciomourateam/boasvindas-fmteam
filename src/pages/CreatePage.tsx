@@ -30,6 +30,8 @@ const plans = [
 export interface StandardBlock {
   enabled: boolean;
   imageUrl?: string;
+  /** Linha curta que aparece embaixo do título no card (grade). */
+  subtitle?: string;
   description?: string;
   login?: string;
   password?: string;
@@ -44,6 +46,7 @@ export interface StandardBlock {
 export interface AreaMembrosBlock {
   enabled: boolean;
   url?: string;
+  subtitle?: string;
   description?: string;
 }
 
@@ -100,11 +103,13 @@ export function mergeStandardBlocks(
     bioimpedancia: {
       enabled: r.bioimpedancia?.enabled ?? legacy.has_bioimpedancia ?? false,
       imageUrl: r.bioimpedancia?.imageUrl ?? "",
+      subtitle: r.bioimpedancia?.subtitle ?? "",
       description: r.bioimpedancia?.description ?? "",
     },
     planoAlimentar: {
       enabled: r.planoAlimentar?.enabled ?? legacy.has_apps ?? false,
       imageUrl: r.planoAlimentar?.imageUrl ?? "",
+      subtitle: r.planoAlimentar?.subtitle ?? "",
       description: r.planoAlimentar?.description ?? "",
       login: r.planoAlimentar?.login ?? legacy.webdiet_login ?? "",
       password: r.planoAlimentar?.password ?? legacy.webdiet_password ?? "",
@@ -115,6 +120,7 @@ export function mergeStandardBlocks(
     treino: {
       enabled: r.treino?.enabled ?? legacy.has_treino ?? false,
       imageUrl: r.treino?.imageUrl ?? "",
+      subtitle: r.treino?.subtitle ?? "",
       description: r.treino?.description ?? "",
       login: r.treino?.login ?? legacy.mfit_login ?? "",
       password: r.treino?.password ?? legacy.mfit_password ?? "",
@@ -125,16 +131,19 @@ export function mergeStandardBlocks(
     checkins: {
       enabled: r.checkins?.enabled ?? false,
       imageUrl: r.checkins?.imageUrl ?? "",
+      subtitle: r.checkins?.subtitle ?? "",
       description: r.checkins?.description ?? "",
     },
     psicologa: {
       enabled: r.psicologa?.enabled ?? legacy.has_psicologa ?? false,
       imageUrl: r.psicologa?.imageUrl ?? "",
+      subtitle: r.psicologa?.subtitle ?? "",
       description: r.psicologa?.description ?? "",
     },
     acessarApp: {
       enabled: r.acessarApp?.enabled ?? false,
       imageUrl: r.acessarApp?.imageUrl ?? "",
+      subtitle: r.acessarApp?.subtitle ?? "",
       description: r.acessarApp?.description ?? "",
       url: r.acessarApp?.url ?? "",
       urlText: r.acessarApp?.urlText ?? "",
@@ -144,6 +153,7 @@ export function mergeStandardBlocks(
     areaMembros: {
       enabled: r.areaMembros?.enabled ?? legacy.has_area_membros ?? false,
       url: r.areaMembros?.url ?? legacy.members_link ?? "",
+      subtitle: r.areaMembros?.subtitle ?? "",
       description: r.areaMembros?.description ?? "",
     },
   };

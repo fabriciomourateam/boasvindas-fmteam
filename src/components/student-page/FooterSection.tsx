@@ -14,7 +14,7 @@ const FooterSection = () => {
           </div>
 
           <p className="text-white/80 text-xs mb-6">
-            Seu sucesso depende de mim e o meu sucesso depende de você.
+            Bora transformar sua decisão em resultado. Conte comigo! 💪
           </p>
 
           <p className="text-white/30 text-xs mt-8">
