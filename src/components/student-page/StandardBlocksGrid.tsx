@@ -121,6 +121,11 @@ const StandardBlocksGrid = ({ data, order }: StandardBlocksGridProps) => {
                   <div className="font-display text-sm sm:text-base leading-tight text-center tracking-wider uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
                     {meta.label}
                   </div>
+                  {data[key]?.subtitle && (
+                    <div className="text-[11px] sm:text-xs leading-snug text-center text-white/85 font-medium max-w-[90%] drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]">
+                      {data[key].subtitle}
+                    </div>
+                  )}
                 </div>
 
                 {/* Indicador "ver mais" no canto inf-dir */}

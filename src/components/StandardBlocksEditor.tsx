@@ -150,6 +150,17 @@ const StandardBlocksEditor = ({ value, onChange, order, onOrderChange, openKeys,
                             <div className="p-4 pt-2 border-t border-border space-y-3">
                               <p className="text-xs text-muted-foreground">{meta.helper}</p>
 
+                              <div>
+                                <label className="text-xs text-muted-foreground font-medium">Subtítulo do card (opcional)</label>
+                                <input
+                                  value={(block as StandardBlock).subtitle || ""}
+                                  onChange={(e) => updateBlock(key, { subtitle: e.target.value })}
+                                  className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground"
+                                  placeholder="Ex: Dieta + treino completos"
+                                />
+                                <p className="text-[10px] text-muted-foreground mt-1">Aparece como uma linha curta embaixo do título, no card da grade.</p>
+                              </div>
+
                               {KEYS_WITH_IMAGE.includes(key) && (
                                 <div className="space-y-2">
                                   {(block as StandardBlock).imageUrl && (
