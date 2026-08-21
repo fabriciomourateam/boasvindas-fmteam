@@ -3,6 +3,7 @@ import { Eye } from "lucide-react";
 import HeroSection from "@/components/student-page/HeroSection";
 import VideoSection from "@/components/student-page/VideoSection";
 import PlanSummary from "@/components/student-page/PlanSummary";
+import StrategySection from "@/components/student-page/StrategySection";
 import NextSteps from "@/components/student-page/NextSteps";
 import LinksBlock from "@/components/student-page/LinksBlock";
 import GuidelinesBlock from "@/components/student-page/GuidelinesBlock";
@@ -39,6 +40,7 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
         supportLink,
         strategy,
         duration,
+        summaryTitle = "ORIENTAÇÕES INICIAIS",
         hideSummaryObjective = false,
         hideSummaryPlan = false,
         hideSummaryDuration = false,
@@ -116,12 +118,14 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
                         objective={objectiveLabels[objective] || objective}
                         plan={planLabels[plan || "shape"] || plan || "Shape"}
                         duration={duration || undefined}
-                        strategy={strategy || undefined}
+                        title={summaryTitle}
                         hideObjective={hideSummaryObjective}
                         hidePlan={hideSummaryPlan}
                         hideDuration={hideSummaryDuration}
                     />
                 );
+            case "strategy":
+                return strategy ? <StrategySection key="strategy" strategy={strategy} /> : null;
             case "steps":
                 return steps.length > 0 ? <NextSteps key="steps" steps={steps} hideTitle={hideStepsTitle} title={stepsTitle} /> : null;
             case "links":

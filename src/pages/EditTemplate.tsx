@@ -34,6 +34,7 @@ interface TemplateForm {
     objective: string;
     strategy: string;
     duration: string;
+    summaryTitle: string;
     hideSummaryObjective: boolean;
     hideSummaryPlan: boolean;
     hideSummaryDuration: boolean;
@@ -90,6 +91,7 @@ const defaultForm: TemplateForm = {
     objective: "emagrecimento",
     strategy: "",
     duration: "",
+    summaryTitle: "ORIENTAÇÕES INICIAIS",
     hideSummaryObjective: false,
     hideSummaryPlan: false,
     hideSummaryDuration: false,
@@ -166,6 +168,7 @@ const EditTemplate = () => {
                 objective: existingTemplate.objective,
                 strategy: content.strategy || "",
                 duration: content.duration || "",
+                summaryTitle: content.summaryTitle ?? "ORIENTAÇÕES INICIAIS",
                 hideSummaryObjective: content.hideSummaryObjective ?? false,
                 hideSummaryPlan: content.hideSummaryPlan ?? false,
                 hideSummaryDuration: content.hideSummaryDuration ?? false,
@@ -233,6 +236,7 @@ const EditTemplate = () => {
         const content: TemplateContent = {
             strategy: form.strategy,
             duration: form.duration,
+            summaryTitle: form.summaryTitle,
             hideSummaryObjective: form.hideSummaryObjective,
             hideSummaryPlan: form.hideSummaryPlan,
             hideSummaryDuration: form.hideSummaryDuration,
