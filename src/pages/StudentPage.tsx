@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import HeroSection from "@/components/student-page/HeroSection";
 import PlanSummary from "@/components/student-page/PlanSummary";
+import StrategySection from "@/components/student-page/StrategySection";
 import NextSteps from "@/components/student-page/NextSteps";
 import LinksBlock from "@/components/student-page/LinksBlock";
 import GuidelinesBlock from "@/components/student-page/GuidelinesBlock";
@@ -110,12 +111,14 @@ const StudentPage = () => {
             objective={objectiveLabels[page.objective] || page.objective}
             plan={planLabels[page.plan] || page.plan}
             duration={page.duration || undefined}
-            strategy={page.strategy || undefined}
+            title={cc.summaryTitle ?? "ORIENTAÇÕES INICIAIS"}
             hideObjective={cc.hideSummaryObjective ?? false}
             hidePlan={cc.hideSummaryPlan ?? false}
             hideDuration={cc.hideSummaryDuration ?? false}
           />
         );
+      case "strategy":
+        return page.strategy ? <StrategySection key="strategy" strategy={page.strategy} /> : null;
       case "steps":
         return steps.length > 0 ? <NextSteps key="steps" steps={steps} hideTitle={cc.hideStepsTitle} title={cc.stepsTitle} /> : null;
       case "links":

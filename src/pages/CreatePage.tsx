@@ -196,6 +196,7 @@ interface FormState {
   mfitPassword: string;
   notes: string;
   strategy: string;
+  summaryTitle: string;
   duration: string;
   hideSummaryObjective: boolean;
   hideSummaryPlan: boolean;
@@ -258,6 +259,7 @@ const defaultForm: FormState = {
   mfitPassword: "",
   notes: "",
   strategy: "",
+  summaryTitle: "ORIENTAÇÕES INICIAIS",
   duration: "12 meses",
   hideSummaryObjective: false,
   hideSummaryPlan: false,
@@ -342,6 +344,7 @@ const CreatePage = () => {
         mfitPassword: existingPage.mfit_password || "",
         notes: existingPage.notes || "",
         strategy: existingPage.strategy || "",
+        summaryTitle: cc.summaryTitle ?? "ORIENTAÇÕES INICIAIS",
         duration: existingPage.duration || "",
         hideSummaryObjective: cc.hideSummaryObjective ?? false,
         hideSummaryPlan: cc.hideSummaryPlan ?? false,
@@ -406,6 +409,7 @@ const CreatePage = () => {
       objective: template.objective,
       strategy: content.strategy || prev.strategy,
       duration: content.duration || prev.duration,
+      summaryTitle: content.summaryTitle ?? prev.summaryTitle,
       hideSummaryObjective: content.hideSummaryObjective ?? prev.hideSummaryObjective,
       hideSummaryPlan: content.hideSummaryPlan ?? prev.hideSummaryPlan,
       hideSummaryDuration: content.hideSummaryDuration ?? prev.hideSummaryDuration,
@@ -466,6 +470,7 @@ const CreatePage = () => {
   const buildCustomContent = (): Json => {
     return {
       folder: form.folder,
+      summaryTitle: form.summaryTitle,
       hideSummaryObjective: form.hideSummaryObjective,
       hideSummaryPlan: form.hideSummaryPlan,
       hideSummaryDuration: form.hideSummaryDuration,
@@ -561,6 +566,7 @@ const CreatePage = () => {
     const content: TemplateContent = {
       strategy: form.strategy,
       duration: form.duration,
+      summaryTitle: form.summaryTitle,
       hideSummaryObjective: form.hideSummaryObjective,
       hideSummaryPlan: form.hideSummaryPlan,
       hideSummaryDuration: form.hideSummaryDuration,

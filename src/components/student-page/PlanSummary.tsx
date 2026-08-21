@@ -5,7 +5,7 @@ interface PlanSummaryProps {
   objective: string;
   plan: string;
   duration?: string;
-  strategy?: string;
+  title?: string;
   hideObjective?: boolean;
   hidePlan?: boolean;
   hideDuration?: boolean;
@@ -15,7 +15,7 @@ const PlanSummary = ({
   objective,
   plan,
   duration,
-  strategy,
+  title,
   hideObjective,
   hidePlan,
   hideDuration,
@@ -23,22 +23,25 @@ const PlanSummary = ({
   const showObjective = !hideObjective && !!objective;
   const showPlan = !hidePlan && !!plan;
   const showDuration = !hideDuration && !!duration;
-  const showStrategy = !!strategy;
 
-  // Se o profissional ocultou tudo, não renderiza nem o cabeçalho órfão.
-  if (!showObjective && !showPlan && !showDuration && !showStrategy) return null;
+  // Sem nenhum card visível, a seção não renderiza (nem título órfão).
+  if (!showObjective && !showPlan && !showDuration) return null;
+
+  const heading = (title ?? "").trim();
 
   return (
     <section className="px-4 sm:px-8 py-10 bg-background">
       <div className="max-w-lg mx-auto space-y-4">
-        <motion.h3
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="font-display text-2xl sm:text-3xl text-foreground"
-        >
-          ORIENTAÇÕES INICIAIS
-        </motion.h3>
+        {heading && (
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-display text-2xl sm:text-3xl text-foreground"
+          >
+            {heading}
+          </motion.h3>
+        )}
 
         <div className="grid gap-3">
           {showObjective && (
@@ -95,19 +98,6 @@ const PlanSummary = ({
             </motion.div>
           )}
         </div>
-
-        {strategy && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-            className="p-5 rounded-lg border border-gold/20 bg-gold/5"
-          >
-            <h4 className="font-semibold text-sm uppercase tracking-wider text-gold-dark mb-2">🧠 Estratégia Inicial</h4>
-            <div className="text-foreground text-sm leading-relaxed quill-content" dangerouslySetInnerHTML={{ __html: strategy }} />
-          </motion.div>
-        )}
       </div>
     </section>
   );

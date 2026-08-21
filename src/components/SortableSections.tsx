@@ -4,6 +4,7 @@ import { GripVertical, EyeOff, Plus } from "lucide-react";
 export const DEFAULT_SECTION_ORDER = [
     "video",
     "summary",
+    "strategy",
     "steps",
     "standardButtons",
     "links",
@@ -15,7 +16,8 @@ export const DEFAULT_SECTION_ORDER = [
 
 export const SECTION_LABELS: Record<string, string> = {
     video: "Vídeo (com botão)",
-    summary: "Resumo do Plano (Objetivo, Estratégia)",
+    summary: "Orientações Iniciais (Objetivo, Plano, Duração)",
+    strategy: "Estratégia Inicial (texto)",
     steps: "Próximos Passos",
     standardButtons: "Botões (Bioimpedância, Plano, Treino, etc.)",
     links: "Links Padrão e Adicionais",
@@ -65,6 +67,15 @@ export function normalizeSectionOrder(raw: any): string[] {
     // Auto-insere 'video' no início (logo após a capa) — seção nova.
     if (!filtered.includes("video")) {
         filtered.unshift("video");
+    }
+    // Auto-insere 'strategy' logo após 'summary' — seção nova (desmembrada do antigo
+    // "Resumo do Plano", que juntava os 3 cards + a Estratégia num bloco só). Assim
+    // páginas/templates antigos mantêm a Estratégia visível no mesmo lugar.
+    if (!filtered.includes("strategy")) {
+        const summaryIdx = filtered.indexOf("summary");
+        // Só reintroduz a Estratégia se a seção antiga (summary) ainda estava visível.
+        // Se o usuário tinha ocultado o "Resumo do Plano" inteiro, mantém tudo oculto.
+        if (summaryIdx >= 0) filtered.splice(summaryIdx + 1, 0, "strategy");
     }
     return filtered;
 }

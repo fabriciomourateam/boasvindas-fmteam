@@ -10,7 +10,9 @@ type TemplateUpdate = TablesUpdate<"templates">;
 export interface TemplateContent {
     strategy?: string;
     duration?: string;
-    /** Visibilidade dos itens da seção "Orientações Iniciais" (Resumo do Plano) no app do aluno. */
+    /** Título editável da seção "Orientações Iniciais"; vazio = sem título. */
+    summaryTitle?: string;
+    /** Visibilidade dos itens da seção "Orientações Iniciais" no app do aluno. */
     hideSummaryObjective?: boolean;
     hideSummaryPlan?: boolean;
     hideSummaryDuration?: boolean;

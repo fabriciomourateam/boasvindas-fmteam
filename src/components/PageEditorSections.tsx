@@ -24,6 +24,7 @@ import StandardBlocksEditor from "@/components/StandardBlocksEditor";
 
 export interface SharedFormShape {
   strategy: string;
+  summaryTitle?: string;
   hideSummaryObjective?: boolean;
   hideSummaryPlan?: boolean;
   hideSummaryDuration?: boolean;
@@ -169,7 +170,7 @@ const PageEditorSections = ({ form, update }: Props) => {
         return (
           <div key="summary" className="p-5 rounded-lg bg-card border border-border">
             <div className="flex items-center justify-between cursor-pointer -m-5 p-5" onClick={() => setIsSummaryCollapsed(!isSummaryCollapsed)}>
-              <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🧠 Estratégia Inicial</h2>
+              <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🎯 Orientações Iniciais</h2>
               <button type="button" className="p-1 hover:bg-secondary rounded-md text-muted-foreground">
                 {!isSummaryCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </button>
@@ -177,8 +178,17 @@ const PageEditorSections = ({ form, update }: Props) => {
             <AnimatePresence>
               {!isSummaryCollapsed && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden pt-4 mt-1 space-y-4">
+                  <div>
+                    <label className="text-xs text-muted-foreground font-medium">Título da seção (deixe em branco para não mostrar título)</label>
+                    <input
+                      value={form.summaryTitle ?? "ORIENTAÇÕES INICIAIS"}
+                      onChange={(e) => update("summaryTitle", e.target.value)}
+                      placeholder="Ex: ORIENTAÇÕES INICIAIS"
+                      className="mt-1 w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
+                    />
+                  </div>
                   <div className="rounded-lg border border-border bg-background/50 p-3">
-                    <p className="text-xs text-muted-foreground font-medium mb-2">O que aparece na seção "Orientações Iniciais" (para o aluno)</p>
+                    <p className="text-xs text-muted-foreground font-medium mb-2">Itens que aparecem para o aluno</p>
                     <div className="flex flex-wrap gap-x-5 gap-y-2">
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" checked={!(form.hideSummaryObjective ?? false)} onChange={(e) => update("hideSummaryObjective", !e.target.checked)} className="w-4 h-4 accent-gold" />
@@ -193,8 +203,26 @@ const PageEditorSections = ({ form, update }: Props) => {
                         <span className="text-xs text-foreground">Duração</span>
                       </label>
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-2">Desmarque para ocultar o item do aluno. A "Estratégia Inicial" abaixo aparece só quando preenchida.</p>
+                    <p className="text-[11px] text-muted-foreground mt-2">Desmarque para ocultar o item. A "Estratégia Inicial" agora é uma seção separada (abaixo) — mova ou oculte em "Ordenar seções".</p>
                   </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+
+      case "strategy":
+        return (
+          <div key="strategy" className="p-5 rounded-lg bg-card border border-border">
+            <div className="flex items-center justify-between cursor-pointer -m-5 p-5" onClick={() => setC("strategy", !isC("strategy"))}>
+              <h2 className="font-semibold text-sm text-foreground uppercase tracking-wider">🧠 Estratégia Inicial</h2>
+              <button type="button" className="p-1 hover:bg-secondary rounded-md text-muted-foreground">
+                {!isC("strategy") ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+            </div>
+            <AnimatePresence>
+              {!isC("strategy") && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden pt-4 mt-1">
                   <RichTextEditor value={form.strategy} onChange={(val) => update("strategy", val)} placeholder="Descreva a estratégia inicial com formatação..." />
                 </motion.div>
               )}
