@@ -34,6 +34,9 @@ interface TemplateForm {
     objective: string;
     strategy: string;
     duration: string;
+    hideSummaryObjective: boolean;
+    hideSummaryPlan: boolean;
+    hideSummaryDuration: boolean;
     whatsappUrl: string;
     supportHours: string;
     notes: string;
@@ -87,6 +90,9 @@ const defaultForm: TemplateForm = {
     objective: "emagrecimento",
     strategy: "",
     duration: "",
+    hideSummaryObjective: false,
+    hideSummaryPlan: false,
+    hideSummaryDuration: false,
     whatsappUrl: "",
     supportHours: "",
     notes: "",
@@ -160,6 +166,9 @@ const EditTemplate = () => {
                 objective: existingTemplate.objective,
                 strategy: content.strategy || "",
                 duration: content.duration || "",
+                hideSummaryObjective: content.hideSummaryObjective ?? false,
+                hideSummaryPlan: content.hideSummaryPlan ?? false,
+                hideSummaryDuration: content.hideSummaryDuration ?? false,
                 whatsappUrl: content.whatsappUrl || "",
                 supportHours: content.supportHours || "",
                 notes: content.notes || "",
@@ -224,6 +233,9 @@ const EditTemplate = () => {
         const content: TemplateContent = {
             strategy: form.strategy,
             duration: form.duration,
+            hideSummaryObjective: form.hideSummaryObjective,
+            hideSummaryPlan: form.hideSummaryPlan,
+            hideSummaryDuration: form.hideSummaryDuration,
             steps: form.steps,
             stepsTitle: form.stepsTitle,
             hideStepsTitle: form.hideStepsTitle,

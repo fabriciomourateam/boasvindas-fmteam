@@ -39,6 +39,9 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
         supportLink,
         strategy,
         duration,
+        hideSummaryObjective = false,
+        hideSummaryPlan = false,
+        hideSummaryDuration = false,
         whatsappUrl,
         supportHours,
         steps = [],
@@ -114,6 +117,9 @@ export default function LivePreviewModal({ formData, isTemplate = false }: Previ
                         plan={planLabels[plan || "shape"] || plan || "Shape"}
                         duration={duration || undefined}
                         strategy={strategy || undefined}
+                        hideObjective={hideSummaryObjective}
+                        hidePlan={hideSummaryPlan}
+                        hideDuration={hideSummaryDuration}
                     />
                 );
             case "steps":
