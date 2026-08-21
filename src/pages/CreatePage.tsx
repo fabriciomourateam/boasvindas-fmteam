@@ -197,6 +197,9 @@ interface FormState {
   notes: string;
   strategy: string;
   duration: string;
+  hideSummaryObjective: boolean;
+  hideSummaryPlan: boolean;
+  hideSummaryDuration: boolean;
   whatsappUrl: string;
   supportHours: string;
   steps: Array<{ title: string; description: string }>;
@@ -256,6 +259,9 @@ const defaultForm: FormState = {
   notes: "",
   strategy: "",
   duration: "12 meses",
+  hideSummaryObjective: false,
+  hideSummaryPlan: false,
+  hideSummaryDuration: false,
   whatsappUrl: "",
   supportHours: "",
   steps: [],
@@ -337,6 +343,9 @@ const CreatePage = () => {
         notes: existingPage.notes || "",
         strategy: existingPage.strategy || "",
         duration: existingPage.duration || "",
+        hideSummaryObjective: cc.hideSummaryObjective ?? false,
+        hideSummaryPlan: cc.hideSummaryPlan ?? false,
+        hideSummaryDuration: cc.hideSummaryDuration ?? false,
         whatsappUrl: cc.whatsappUrl || "",
         supportHours: cc.supportHours || "",
         steps: cc.steps || [],
@@ -397,6 +406,9 @@ const CreatePage = () => {
       objective: template.objective,
       strategy: content.strategy || prev.strategy,
       duration: content.duration || prev.duration,
+      hideSummaryObjective: content.hideSummaryObjective ?? prev.hideSummaryObjective,
+      hideSummaryPlan: content.hideSummaryPlan ?? prev.hideSummaryPlan,
+      hideSummaryDuration: content.hideSummaryDuration ?? prev.hideSummaryDuration,
       whatsappUrl: content.whatsappUrl || prev.whatsappUrl,
       supportHours: content.supportHours || prev.supportHours,
       steps: content.steps || prev.steps,
@@ -454,6 +466,9 @@ const CreatePage = () => {
   const buildCustomContent = (): Json => {
     return {
       folder: form.folder,
+      hideSummaryObjective: form.hideSummaryObjective,
+      hideSummaryPlan: form.hideSummaryPlan,
+      hideSummaryDuration: form.hideSummaryDuration,
       whatsappUrl: form.whatsappUrl,
       supportHours: form.supportHours,
       steps: form.steps,
@@ -546,6 +561,9 @@ const CreatePage = () => {
     const content: TemplateContent = {
       strategy: form.strategy,
       duration: form.duration,
+      hideSummaryObjective: form.hideSummaryObjective,
+      hideSummaryPlan: form.hideSummaryPlan,
+      hideSummaryDuration: form.hideSummaryDuration,
       steps: form.steps,
       stepsTitle: form.stepsTitle,
       hideStepsTitle: form.hideStepsTitle,

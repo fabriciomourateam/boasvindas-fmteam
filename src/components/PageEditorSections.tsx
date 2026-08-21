@@ -24,6 +24,9 @@ import StandardBlocksEditor from "@/components/StandardBlocksEditor";
 
 export interface SharedFormShape {
   strategy: string;
+  hideSummaryObjective?: boolean;
+  hideSummaryPlan?: boolean;
+  hideSummaryDuration?: boolean;
   steps: Array<{ title: string; description: string }>;
   stepsTitle: string;
   hideStepsTitle: boolean;
@@ -173,7 +176,25 @@ const PageEditorSections = ({ form, update }: Props) => {
             </div>
             <AnimatePresence>
               {!isSummaryCollapsed && (
-                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden pt-4 mt-1">
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden pt-4 mt-1 space-y-4">
+                  <div className="rounded-lg border border-border bg-background/50 p-3">
+                    <p className="text-xs text-muted-foreground font-medium mb-2">O que aparece na seção "Orientações Iniciais" (para o aluno)</p>
+                    <div className="flex flex-wrap gap-x-5 gap-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={!(form.hideSummaryObjective ?? false)} onChange={(e) => update("hideSummaryObjective", !e.target.checked)} className="w-4 h-4 accent-gold" />
+                        <span className="text-xs text-foreground">Objetivo</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={!(form.hideSummaryPlan ?? false)} onChange={(e) => update("hideSummaryPlan", !e.target.checked)} className="w-4 h-4 accent-gold" />
+                        <span className="text-xs text-foreground">Plano</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={!(form.hideSummaryDuration ?? false)} onChange={(e) => update("hideSummaryDuration", !e.target.checked)} className="w-4 h-4 accent-gold" />
+                        <span className="text-xs text-foreground">Duração</span>
+                      </label>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-2">Desmarque para ocultar o item do aluno. A "Estratégia Inicial" abaixo aparece só quando preenchida.</p>
+                  </div>
                   <RichTextEditor value={form.strategy} onChange={(val) => update("strategy", val)} placeholder="Descreva a estratégia inicial com formatação..." />
                 </motion.div>
               )}

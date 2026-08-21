@@ -6,9 +6,28 @@ interface PlanSummaryProps {
   plan: string;
   duration?: string;
   strategy?: string;
+  hideObjective?: boolean;
+  hidePlan?: boolean;
+  hideDuration?: boolean;
 }
 
-const PlanSummary = ({ objective, plan, duration, strategy }: PlanSummaryProps) => {
+const PlanSummary = ({
+  objective,
+  plan,
+  duration,
+  strategy,
+  hideObjective,
+  hidePlan,
+  hideDuration,
+}: PlanSummaryProps) => {
+  const showObjective = !hideObjective && !!objective;
+  const showPlan = !hidePlan && !!plan;
+  const showDuration = !hideDuration && !!duration;
+  const showStrategy = !!strategy;
+
+  // Se o profissional ocultou tudo, não renderiza nem o cabeçalho órfão.
+  if (!showObjective && !showPlan && !showDuration && !showStrategy) return null;
+
   return (
     <section className="px-4 sm:px-8 py-10 bg-background">
       <div className="max-w-lg mx-auto space-y-4">
@@ -22,39 +41,43 @@ const PlanSummary = ({ objective, plan, duration, strategy }: PlanSummaryProps) 
         </motion.h3>
 
         <div className="grid gap-3">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="flex items-center gap-3 p-4 rounded-lg bg-secondary"
-          >
-            <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center flex-shrink-0">
-              <Target className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Objetivo</span>
-              <p className="font-semibold text-foreground">{objective}</p>
-            </div>
-          </motion.div>
+          {showObjective && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="flex items-center gap-3 p-4 rounded-lg bg-secondary"
+            >
+              <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center flex-shrink-0">
+                <Target className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Objetivo</span>
+                <p className="font-semibold text-foreground">{objective}</p>
+              </div>
+            </motion.div>
+          )}
 
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center gap-3 p-4 rounded-lg bg-secondary"
-          >
-            <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center flex-shrink-0">
-              <Award className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Plano</span>
-              <p className="font-semibold text-foreground">{plan}</p>
-            </div>
-          </motion.div>
+          {showPlan && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center gap-3 p-4 rounded-lg bg-secondary"
+            >
+              <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center flex-shrink-0">
+                <Award className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Plano</span>
+                <p className="font-semibold text-foreground">{plan}</p>
+              </div>
+            </motion.div>
+          )}
 
-          {duration && (
+          {showDuration && (
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}

@@ -111,6 +111,9 @@ const StudentPage = () => {
             plan={planLabels[page.plan] || page.plan}
             duration={page.duration || undefined}
             strategy={page.strategy || undefined}
+            hideObjective={cc.hideSummaryObjective ?? false}
+            hidePlan={cc.hideSummaryPlan ?? false}
+            hideDuration={cc.hideSummaryDuration ?? false}
           />
         );
       case "steps":
