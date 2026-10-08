@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import BemVindoLinkGenerator from "@/components/BemVindoLinkGenerator";
 
 const statusColors: Record<string, string> = {
   rascunho: "bg-muted text-muted-foreground",
@@ -293,6 +294,8 @@ const Dashboard = () => {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8">
+        <BemVindoLinkGenerator />
+
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[

@@ -10,6 +10,7 @@ import StudentPage from "./pages/StudentPage";
 import TemplatesPage from "./pages/TemplatesPage";
 import EditTemplate from "./pages/EditTemplate";
 import NotFound from "./pages/NotFound";
+import BemVindo from "./pages/BemVindo";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           {/* Public */}
           <Route path="/" element={<Login />} />
           <Route path="/aluno/:slug" element={<StudentPage />} />
+          <Route path="/bem-vindo" element={<BemVindo />} />
 
           {/* Admin */}
           <Route path="/admin" element={<Dashboard />} />
